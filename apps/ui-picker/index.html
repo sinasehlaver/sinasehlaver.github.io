@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" data-palette="midnight" data-theme="dark" data-accent="teal" data-type="serif" data-shape="pill" data-density="comfortable" data-motion="calm">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI picker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../_look/tokens.css">
+<link rel="stylesheet" href="picker.css">
+<link rel="stylesheet" href="picker-more.css">
+<link rel="stylesheet" href="looks.css">
+<link rel="stylesheet" href="looks-b.css">
+<link rel="stylesheet" href="looks-c.css">
+<link rel="stylesheet" href="looks-d.css">
+<link rel="stylesheet" href="table-together.css">
+<link rel="stylesheet" href="circuits.css">
+<link rel="stylesheet" href="path-garden.css">
+<link rel="stylesheet" href="path-garden-real.css">
+<link rel="stylesheet" href="alive.css">
+<link rel="stylesheet" href="../keyif/src/moments.css">
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <h1>UI <b>picker</b></h1>
+    <div class="progress"><div class="bar"><i id="prog-bar"></i></div><span id="prog-n">0 / 0</span> picked</div>
+    <span class="spacer"></span>
+    <span class="file-chip" id="file-chip" data-s="idle"><span class="dot"></span><span>Picks kept in this browser</span></span>
+    <button class="btn quiet" id="reset-btn" data-tip="Clear every pick (undoable)">Reset</button>
+    <button class="btn" id="load-btn" data-tip="Open a picks.json">Load picks</button>
+    <button class="btn primary" id="save-btn" data-tip="Write picks.json  ⌘S"><span class="spin"></span>Save picks</button>
+    <button class="ib" id="theme-btn" data-tip="Light / dark"></button>
+  </header>
+  <nav class="nav" id="nav"></nav>
+  <main>
+    <div class="intro">
+      <h2>Pick the look and behaviour for new apps</h2>
+      <p>Every card is live: hover, click, drag, right-click. Pick one or more per section (foundations are pick-one and restyle the whole page), add a note where you want a mix, then <b>Save picks</b> as <code>ui-picker/picks.json</code>. Once saved, every change is written back to that file.</p>
+    </div>
+    <div id="cats"></div>
+  </main>
+</div>
+<div class="toast-host" id="global-toasts" style="position:fixed;left:50%;bottom:20px;translate:-50%"></div>
+<script src="variants.js"></script>
+<script src="variants-more.js"></script>
+<script src="circuits.js"></script>
+<script src="path-garden.js"></script>
+<script src="path-garden-real.js"></script>
+<script src="looks.js"></script>
+<script src="looks-b.js"></script>
+<script src="looks-c.js"></script>
+<script src="looks-d.js"></script>
+<script src="looks-apply.js"></script>
+<script src="picker.js"></script>
+<script src="table-together.js"></script>
+<script src="../keyif/src/sound.js"></script>
+<script src="done-moment.js"></script>
+</body>
+</html>

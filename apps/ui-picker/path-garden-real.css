@@ -1,0 +1,67 @@
+/* keyif path & garden round 2 (realistic skins). Scoped to .pgr; markup in path-garden-real.js. */
+.pgr { --far: #9bb3c9; --mid: #7f9b8c; --tree: #4f7a4a; --tree-l: #86b06a; --trunk: #5a4630; --glow: #ffd9a0;
+  --noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --rock: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='r'><feTurbulence type='fractalNoise' baseFrequency='.07 .11' numOctaves='4' seed='4'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.1'/></filter><rect width='100%' height='100%' filter='url(%23r)'/></svg>"); }
+.pgr-golden { --sky1: #7fb2d6; --sky2: #ffd9a8; --gr1: #9ab45a; --gr2: #6f9444; --road: #d9c08f; --far: #a9b4cc; --mid: #8fa57e; --tree: #55803f; --tree-l: #a3bf5c; --glow: #ffcf8a; }
+.pgr-diorama { --sky1: #cfe3ef; --sky2: #f4ead8; --gr1: #7fae5f; --gr2: #5f9250; --road: #cdb98f; --far: #b8c8c8; --mid: #93ad92; --tree: #4f7f4b; --tree-l: #8ebb6a; --glow: #fff0c8; }
+.pgr-mist { --sky1: #a9bfd8; --sky2: #f3dbe0; --gr1: #8bb59a; --gr2: #5f8f7d; --road: #c9bfa6; --far: #8aa0bd; --mid: #7a9a9e; --tree: #3f6a5f; --tree-l: #7fae93; --trunk: #3b3a33; --glow: #ffe6ee; }
+[data-theme="dark"] .pgr-golden { --sky1: #1d2a52; --sky2: #c06f4f; --far: #4a4c78; --mid: #3e5560; --tree: #263f35; --tree-l: #3e6044; --glow: #ff9a5a; }
+[data-theme="dark"] .pgr-diorama { --sky1: #1c2b3a; --sky2: #4a4a58; --far: #3d4d5a; --mid: #35493f; --tree: #243a2c; --tree-l: #3a5a3a; }
+[data-theme="dark"] .pgr-mist { --sky1: #202a48; --sky2: #5d4f6e; --far: #3d4a6c; --mid: #34505a; --tree: #1f3a38; --tree-l: #36605a; }
+
+.pgr .pg-view { position: relative; }
+.pgr-scenery { position: absolute; inset: 0; pointer-events: none; }
+.pgr-far, .pgr-trees { position: absolute; left: 0; width: 100%; top: 14px; height: 84px; }
+.pgr-trees { top: 12px; } .pgr-trees .t { transform-box: fill-box; transform-origin: 50% 100%; animation: pgr-sway 6s ease-in-out infinite; animation-delay: var(--d); }
+@keyframes pgr-sway { 50% { transform: rotate(1.4deg); } }
+.pgr-sun-glow { display: none; }
+.pgr .pg-sun { box-shadow: 0 0 60px 28px color-mix(in srgb, var(--glow) 55%, transparent); background: var(--glow); }
+.pgr .pg-cloud { height: 10px; background: color-mix(in srgb, #fff 70%, var(--sky2)); filter: blur(5px); opacity: .8; }
+
+/* ground: grain + mowed-light variation instead of one flat gradient */
+.pgr .pg-grass { background: var(--noise), repeating-linear-gradient(100deg, #ffffff10 0 14px, #0000000c 14px 30px), radial-gradient(ellipse at 50% 30%, var(--gr1), var(--gr2) 75%); background-blend-mode: soft-light, normal, normal; }
+.pgr .pg-road path { opacity: 1; filter: drop-shadow(0 1px 1px #0003); }
+.pgr-golden .pg-flat .pg-road path, .pgr-golden.pg-flat .pg-road path, .pgr-mist.pg-flat .pg-road path { stroke-width: 24; }
+.pgr .pg-road { mix-blend-mode: normal; }
+
+/* stones: rock texture, lit from the sun side, soft contact shadow, thick sides in 3D */
+.pgr .pg-st i:last-child { background: var(--rock), radial-gradient(circle at 32% 24%, color-mix(in srgb, var(--stone), #fff 45%), var(--stone) 55%, var(--stone-d) 100%); background-blend-mode: multiply, normal; box-shadow: inset -3px -4px 6px #0000002e, inset 2px 2px 4px #ffffff55; }
+.pgr.pg-flat .pg-st i:last-child { box-shadow: inset -3px -4px 6px #0000002e, inset 2px 2px 4px #ffffff55, 0 5px 0 var(--stone-d), 0 9px 9px #00000040; }
+.pgr.pg-solid .pg-st i { background: var(--rock), linear-gradient(var(--stone), var(--stone-d)); background-blend-mode: multiply, normal; }
+.pgr.pg-solid .pg-st i:first-child { filter: blur(3px) brightness(.35); opacity: .55; scale: 1.18; }
+.pgr .pg-ghost { border-color: #fffc; border-style: solid; border-width: 1px; background: #ffffff1c; }
+
+/* flowers: soft shading + a little shadow on the ground */
+.pgr .pg-pet { background: radial-gradient(circle at 50% 78%, color-mix(in srgb, var(--petal), #fff 38%), var(--petal) 55%, color-mix(in srgb, var(--petal), #000 22%)); }
+.pgr .pg-stem { background: linear-gradient(90deg, #3f7a3d, #6aa95c); }
+.pgr .pg-bill::before { content: ""; position: absolute; left: -10px; top: -3px; width: 22px; height: 7px; border-radius: 50%; background: #0000002e; filter: blur(2px); }
+
+/* light, rays, grain, tilt-shift, vignette, front grass */
+.pgr-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.pgr-front { position: absolute; left: 0; bottom: 0; width: 100%; height: 44px; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.pgr-front path { transform-box: fill-box; transform-origin: 50% 100%; animation: pgr-sway 4.5s ease-in-out infinite; animation-delay: var(--d); }
+.pgr-light { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 85% 12%, color-mix(in srgb, var(--glow) 50%, transparent), transparent 70%); mix-blend-mode: soft-light; }
+.pgr-golden .pgr-light { background: radial-gradient(ellipse 80% 70% at 88% 10%, color-mix(in srgb, var(--glow) 70%, transparent), transparent 72%), linear-gradient(#0000 55%, #ff9f4a22); mix-blend-mode: soft-light; }
+.pgr-grain { position: absolute; inset: 0; background: var(--noise); opacity: .16; mix-blend-mode: overlay; }
+.pgr-vig { position: absolute; inset: 0; box-shadow: inset 0 0 70px #00000030; }
+.pgr-tilt { display: none; position: absolute; left: 0; right: 0; }
+.pgr-diorama .pgr-tilt { display: block; backdrop-filter: blur(3.5px); }
+.pgr-diorama .pgr-tilt.t { top: 0; height: 26%; -webkit-mask-image: linear-gradient(#000 20%, transparent); mask-image: linear-gradient(#000 20%, transparent); }
+.pgr-diorama .pgr-tilt.b { bottom: 0; height: 16%; -webkit-mask-image: linear-gradient(transparent, #000 80%); mask-image: linear-gradient(transparent, #000 80%); }
+.pgr-diorama .pgr-front { display: none; }
+.pgr-diorama .pgr-vig { box-shadow: inset 0 0 90px #00000040; }
+.pgr-rays { display: none; position: absolute; inset: -10% 0 40% 0; pointer-events: none; }
+.pgr-mist .pgr-rays { display: block; background: repeating-conic-gradient(from 160deg at 88% -10%, #ffffff30 0 3deg, #0000 3deg 9deg); filter: blur(6px); animation: pgr-ray 9s ease-in-out infinite alternate; -webkit-mask-image: linear-gradient(#000, transparent); mask-image: linear-gradient(#000, transparent); }
+@keyframes pgr-ray { to { opacity: .45; } }
+.pgr-mist .pgr-far { filter: blur(1px); opacity: .9; }
+.pgr-mist .pgr-fx::after { content: ""; position: absolute; left: 0; right: 0; top: 36%; height: 26%; background: linear-gradient(#0000, #ffffff66, #0000); filter: blur(6px); animation: pgr-fog 14s ease-in-out infinite alternate; }
+@keyframes pgr-fog { to { translate: 14px 0; opacity: .7; } }
+.pgr-mist .pgr-front path { stroke-opacity: .85; }
+.pgr .pg-view { background: linear-gradient(var(--sky1), var(--sky2) 30%, var(--gr2) 31%); }
+.pgr.pg-solid .pg-view { background: linear-gradient(var(--sky1), var(--sky2) 36%, var(--gr2) 41%); }
+@media (prefers-reduced-motion: reduce) { .pgr *, .pgr *::before, .pgr *::after { animation: none !important; } }
+/* round-2 fixes: flat skins keep a low, straight horizon so the painted ridges show; softer mowing stripes */
+.pgr.pg-flat .pg-grass { inset: 22px -10px 0; border-radius: 0; box-shadow: 0 -10px 18px -6px color-mix(in srgb, var(--mid), transparent 40%); }
+.pgr .pg-grass { background: var(--noise), repeating-linear-gradient(100deg, #ffffff07 0 18px, #00000006 18px 36px), radial-gradient(ellipse at 50% 30%, var(--gr1), var(--gr2) 80%); background-blend-mode: soft-light, normal, normal; }
+.pgr.pg-flat .pg-view { background: linear-gradient(var(--sky1), var(--sky2) 30%, var(--mid) 31%); }
+.pgr.pg-solid .pg-view { background: linear-gradient(var(--sky1), var(--sky2) 34%, var(--mid) 38%, var(--gr2) 42%); }

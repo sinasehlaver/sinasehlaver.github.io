@@ -1,0 +1,43 @@
+/* "Alive" group: ambient life, entrances, touches. Demos are CSS-only and loop; all motion stops under reduced motion.
+   Real implementations: keyif/src/app.css (quiet pass). Scope: .al-*. */
+.al { position: relative; overflow: hidden; min-height: 150px; border-radius: var(--r2, 12px); padding: var(--s4); background: var(--bg); border: 1px solid var(--line); }
+.al > * { position: relative; z-index: 1; }
+.al h4 { margin: 0; font-size: 1.5rem; font-weight: 400; }
+.al p { margin: 4px 0 0; color: var(--muted); font-style: italic; }
+.al-bg { position: absolute; inset: -30%; z-index: 0; pointer-events: none; }
+.al-still .al-bg { display: none; }
+.al-breathe .al-bg { background: radial-gradient(45% 40% at 25% 25%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%), radial-gradient(40% 35% at 80% 80%, color-mix(in srgb, var(--accent) 18%, #e9b872 30%), transparent 72%); animation: al-breathe 9s ease-in-out infinite alternate; }
+@keyframes al-breathe { from { transform: scale(1); opacity: .6; } to { transform: scale(1.15) translate(4%, -3%); opacity: 1; } }
+.al-dusk .al-bg { background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 28%, transparent), color-mix(in srgb, #7a6cc4 24%, transparent), color-mix(in srgb, #e9b872 26%, transparent), color-mix(in srgb, var(--accent) 28%, transparent)); background-size: 300% 300%; animation: al-dusk 16s ease-in-out infinite; }
+@keyframes al-dusk { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.al-motes .al-bg { inset: 0; background-image: radial-gradient(2px 2px at 20% 80%, var(--accent), transparent), radial-gradient(3px 3px at 55% 90%, var(--accent), transparent), radial-gradient(2px 2px at 80% 85%, var(--accent), transparent), radial-gradient(2px 2px at 35% 95%, var(--accent), transparent), radial-gradient(3px 3px at 68% 100%, var(--accent), transparent); background-size: 100% 140%; opacity: .5; animation: al-motes 12s linear infinite; }
+@keyframes al-motes { from { background-position: 0 0; } to { background-position: 0 -140%; } }
+.al-tide .al-bg { inset: auto -10% -30% -10%; height: 70%; background: radial-gradient(60% 100% at 50% 100%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%); animation: al-tide 7s ease-in-out infinite alternate; }
+@keyframes al-tide { from { transform: translateY(18%) scaleX(.9); } to { transform: translateY(-8%) scaleX(1.1); } }
+
+.al-in-none h4, .al-in-none p { animation: none; }
+.al-in-rise h4, .al-in-rise p, .al-in-blur h4, .al-in-blur p, .al-in-words span { animation-duration: 6s; animation-iteration-count: infinite; animation-timing-function: var(--ease, ease-out); animation-fill-mode: both; }
+.al-in-rise h4 { animation-name: al-rise; } .al-in-rise p { animation-name: al-rise; animation-delay: .5s; }
+.al-in-blur h4 { animation-name: al-blur; } .al-in-blur p { animation-name: al-blur; animation-delay: .6s; }
+.al-in-words h4 span { display: inline-block; margin-right: .3em; animation-name: al-blur; animation-delay: calc(var(--i) * .45s); }
+@keyframes al-rise { 0% { opacity: 0; transform: translateY(12px); } 25%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@keyframes al-blur { 0% { opacity: 0; filter: blur(6px); } 25%, 90% { opacity: 1; filter: none; } 100% { opacity: 0; } }
+
+.al-rows { display: grid; gap: 4px; margin-top: var(--s3); }
+.al-row { display: flex; align-items: center; gap: var(--s3); padding: 6px 10px; border-radius: 999px; transition: background 500ms var(--ease, ease); }
+.al-row .al-act { margin-left: auto; opacity: 0; transition: opacity 500ms var(--ease, ease); color: var(--muted); }
+.al-hover-reveal .al-row:hover, .al-hover-reveal .al-row:focus-within { background: color-mix(in srgb, var(--surface) 80%, transparent); }
+.al-hover-reveal .al-row:hover .al-act, .al-hover-reveal .al-row:focus-within .al-act { opacity: 1; }
+.al-hover-lean .al-row { transition: transform 400ms var(--ease, ease), color 400ms; }
+.al-hover-lean .al-row:hover { transform: translateX(6px); color: var(--accent); }
+.al-hover-lean .al-act { display: none; }
+.al-hover-glow .al-row { transition: box-shadow 600ms var(--ease, ease); }
+.al-hover-glow .al-row:hover { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent), 0 6px 24px color-mix(in srgb, var(--accent) 22%, transparent); }
+.al-hover-glow .al-act { display: none; }
+.al-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex: none; }
+.al-idle-breath .al-dot { animation: al-pulse 4s ease-in-out infinite; }
+.al-idle-still .al-dot { opacity: .6; }
+.al-idle-glow .al-dot { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent); animation: al-halo 3.2s ease-out infinite; }
+@keyframes al-pulse { 0%, 100% { transform: scale(.8); opacity: .5; } 50% { transform: scale(1.2); opacity: 1; } }
+@keyframes al-halo { to { box-shadow: 0 0 0 16px transparent; } }
+@media (prefers-reduced-motion: reduce) { .al *, .al-bg { animation: none !important; } .al h4, .al p { opacity: 1; } }

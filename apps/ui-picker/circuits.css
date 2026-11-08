@@ -1,0 +1,60 @@
+/* "Circuit drawings" category: three looks over one geometry (circuits.js). Own .cd-* classes, no data-a. */
+.cd { width: 100%; height: auto; display: block; font: 600 11px/1 var(--font-text, system-ui); user-select: none; }
+.cd .w, .cd .f { fill: none; stroke-linecap: round; stroke-linejoin: round; transition: stroke var(--t-hover, 220ms); }
+.cd .f { opacity: 0; transition: opacity var(--t-hover, 220ms); animation: cd-flow .8s linear infinite; }
+.cd .on .f { opacity: 1; }
+@keyframes cd-flow { to { stroke-dashoffset: -18; } }
+@media (prefers-reduced-motion: reduce) { .cd .f { animation: none; } }
+.cd .sw { cursor: pointer; outline: none; }
+.cd .sw .hit { fill: transparent; }
+.cd .sw:hover .hit { fill: color-mix(in srgb, var(--cd-high) 14%, transparent); }
+.cd .sw:focus-visible .hit { stroke: var(--cd-high); stroke-width: 2; }
+.cd .lever { transition: transform var(--t-hover, 220ms) cubic-bezier(.25,.8,.25,1); }
+.cd .sw:not(.closed) .lever { transform: rotate(-30deg); }
+.cd .glow, .cd .lit { opacity: 0; transition: opacity var(--t-hover, 220ms); }
+.cd .on .glow, .cd .on .lit { opacity: 1; }
+.cd text { text-anchor: middle; dominant-baseline: central; }
+
+/* A: textbook schematic. Thin lines on the page, current as a marching dash */
+.cd-a { --cd-high: var(--accent); --cd-off: var(--muted, #8a8f98); color: var(--text, currentColor); }
+.cd-a .w { stroke: var(--cd-off); stroke-width: 2; }
+.cd-a .on .w { stroke: var(--cd-high); }
+.cd-a .f { stroke: var(--cd-high); stroke-width: 4; stroke-dasharray: 3 15; }
+.cd-a .sym { fill: none; stroke: var(--cd-off); stroke-width: 2; stroke-linecap: round; }
+.cd-a .on .sym, .cd-a .closed .sym { stroke: var(--cd-high); }
+.cd-a .glow { fill: color-mix(in srgb, var(--cd-high) 25%, transparent); }
+.cd-a text { fill: currentColor; }
+
+/* B: workbench. Thick rubber wires, a real battery, a bulb with a filament, gates as chips */
+.cd-b { --cd-high: #f59e0b; --cd-off: #7c8594; color: var(--text, currentColor); }
+.cd-b .w { stroke: var(--cd-off); stroke-width: 7; }
+.cd-b .on .w { stroke: #b4610a; }
+.cd-b .f { stroke: var(--cd-high); stroke-width: 3.5; stroke-dasharray: 9 9; }
+.cd-b .body { fill: #39414f; stroke: #1f2530; stroke-width: 1.5; }
+.cd-b .cap { fill: #c2c8d2; stroke: #1f2530; stroke-width: 1.5; }
+.cd-b .band { fill: #f59e0b; }
+.cd-b .pin { fill: #c2c8d2; }
+.cd-b .bulb { fill: color-mix(in srgb, var(--cd-off) 22%, transparent); stroke: var(--cd-off); stroke-width: 2; }
+.cd-b .on .bulb { fill: #fde68a; stroke: #b4610a; }
+.cd-b .fil { fill: none; stroke: #39414f; stroke-width: 1.6; }
+.cd-b .on .fil { stroke: #b4610a; }
+.cd-b .glow { fill: #f59e0b; filter: blur(9px); }
+.cd-b .lever line { stroke: #c2c8d2; stroke-width: 6; stroke-linecap: round; }
+.cd-b .lever circle { fill: #ef4444; stroke: #1f2530; stroke-width: 1.5; }
+.cd-b .post { fill: #39414f; stroke: #1f2530; stroke-width: 1.5; }
+.cd-b text { fill: currentColor; }
+.cd-b text.onb { fill: #e8ebf0; }
+
+/* C: glow on dark. Always-dark panel, electricity as light moving along thin tubes */
+.cd-c { --cd-high: #5eead4; --cd-off: #33465a; border-radius: var(--r, 10px); color: #c8d6e5; }
+.cd-c .panel { fill: #0b1622; }
+.cd-c .w { stroke: var(--cd-off); stroke-width: 2; }
+.cd-c .on .w { stroke: var(--cd-high); filter: drop-shadow(0 0 3px var(--cd-high)); }
+.cd-c .f { stroke: #f0fffc; stroke-width: 3.5; stroke-dasharray: 0.1 17.9; filter: drop-shadow(0 0 3px #f0fffc); }
+.cd-c .sym { fill: none; stroke: var(--cd-off); stroke-width: 2; stroke-linecap: round; }
+.cd-c .on .sym, .cd-c .closed .sym { stroke: var(--cd-high); filter: drop-shadow(0 0 3px var(--cd-high)); }
+.cd-c .block { fill: #12233a; stroke: #4a6580; stroke-width: 1.5; }
+.cd-c .orb { fill: #16283c; stroke: var(--cd-off); stroke-width: 2; }
+.cd-c .on .orb { fill: var(--cd-high); stroke: var(--cd-high); }
+.cd-c .glow { fill: var(--cd-high); filter: blur(11px); }
+.cd-c text { fill: currentColor; }

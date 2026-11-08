@@ -1,0 +1,40 @@
+/* "Table: everything together" demo (table-together). Scoped to .tt. */
+.tt { width: 100%; font-size: 12.5px; display: flex; flex-direction: column; gap: 8px; }
+.tt-top { display: flex; align-items: center; gap: 8px; min-height: 30px; }
+.tt-bulk { display: flex; align-items: center; gap: 6px; padding: 4px 6px 4px 12px; border-radius: var(--r-sm); background: var(--text); color: var(--bg); box-shadow: var(--shadow-lg);
+  transition: opacity var(--t-pop) var(--ease), transform var(--t-pop) var(--ease); }
+.tt-bulk.hide { opacity: 0; transform: translateY(4px); pointer-events: none; }
+.tt-bulk button { border: 0; background: color-mix(in srgb, var(--bg) 14%, transparent); color: inherit; padding: 3px 9px; border-radius: 6px; font-size: 12.5px; }
+.tt-bulk button:hover { background: color-mix(in srgb, var(--bg) 26%, transparent); }
+.tt-reset { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--accent-tint); color: var(--text); font-size: 12px;
+  transition: opacity var(--t-pop) var(--ease); }
+.tt-reset:hover { border-color: var(--accent); }
+.tt-reset.hide { opacity: 0; pointer-events: none; }
+.tt-tbl { position: relative; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.tt-body { position: relative; }
+.tt-tr { --cols: 18px 18px minmax(0, 1.7fr) minmax(0, 1.1fr) 38px 36px 40px; position: relative; display: grid; grid-template-columns: var(--cols); gap: 8px; align-items: center; padding: 7px 10px;
+  background: var(--surface); transition: background var(--t-hover) var(--ease), opacity var(--t-pop) var(--ease); outline-offset: -2px; }
+.tt.min .tt-tr { --cols: 18px minmax(0, 1.7fr) minmax(0, 1.1fr) 38px 36px 40px; }
+.tt-body .tt-tr, .tt-th + .tt-body .tt-tr { border-top: 1px solid var(--line); }
+.tt-tr:not(.tt-th):hover { background: var(--hover); }
+.tt-tr.sel, .tt-tr.sel:hover { background: var(--accent-tint); }
+.tt-tr.gone { opacity: 0; }
+.tt-tr.lifted { opacity: .4; }
+.tt-ghost { position: absolute; left: 0; z-index: 4; pointer-events: none; opacity: .95; border: 1px solid var(--line); border-radius: var(--r-sm); box-shadow: var(--shadow-lg); transform: rotate(-1.5deg) scale(1.02); }
+.tt-th { font-size: 11px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; background: var(--surface2); }
+.tt-th button { border: 0; background: none; padding: 2px 4px; margin: -2px -4px; text-align: left; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; border-radius: 4px; white-space: nowrap; }
+.tt-th button:hover { background: var(--hover); color: var(--text); }
+.tt .sa { color: var(--accent); margin-left: 3px; font-size: 9px; }
+.tt-w { display: block; min-width: 0; }
+.tt-t { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tt-t[contenteditable="true"] { text-overflow: clip; outline: 2px solid var(--accent); border-radius: 3px; background: var(--surface); }
+.tt-tr .cb[class*="part"] { background: var(--accent); border-color: var(--accent); }
+.tt-tr .cb.part::after { content: "–"; color: var(--on-accent); font-size: 12px; font-weight: 800; }
+.tt-grip { color: var(--muted); cursor: grab; opacity: .35; text-align: center; touch-action: none; transition: opacity var(--t-hover) var(--ease); }
+.tt-tr:hover .tt-grip { opacity: .9; }
+.tt.sorted .tt-grip { cursor: not-allowed; opacity: .15 !important; }
+.tt-acts { position: absolute; right: 6px; top: 50%; translate: 0 -50%; display: flex; gap: 2px; padding-left: 6px; background: var(--hover); border-radius: var(--r-xs); opacity: 0; transition: opacity var(--t-hover) var(--ease); }
+.tt-tr.sel .tt-acts { background: var(--accent-tint); }
+.tt-tr:hover .tt-acts, .tt-tr:focus-within .tt-acts { opacity: 1; }
+.tt-acts .ib { width: 24px; height: 24px; }
+.stage.tall:has(.tt) { min-height: 340px; }

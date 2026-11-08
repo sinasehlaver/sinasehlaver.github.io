@@ -1,0 +1,97 @@
+/* Look sections (looks.js). Every rule is scoped .lk-<scope>.m-<id>; .lk itself is just a column wrapper. */
+.lk { display: flex; flex-direction: column; gap: var(--s2); }
+.lk .anchor { align-self: flex-start; }
+
+/* checkbox: switch */
+.lk-sw.m-ios .sw { width: 50px; height: 30px; }
+.lk-sw.m-ios .sw::after { width: 24px; height: 24px; top: 2px; left: 2px; }
+.lk-sw.m-ios .sw.on { background: #34c759; border-color: #34c759; }
+.lk-sw.m-ios .sw.on::after { transform: translateX(20px); }
+.lk-sw.m-slab .sw { width: 30px; height: 16px; border-radius: 3px; background: transparent; border: 1.5px solid var(--muted); }
+.lk-sw.m-slab .sw::after { width: 10px; height: 10px; top: 1.5px; left: 1.5px; border-radius: 1px; background: var(--muted); box-shadow: none; }
+.lk-sw.m-slab .sw.on { background: var(--accent-tint); border-color: var(--accent); }
+.lk-sw.m-slab .sw.on::after { background: var(--accent); transform: translateX(14px); }
+.lk-sw.m-labelled .sw { width: 62px; height: 26px; }
+.lk-sw.m-labelled .sw::after { width: 20px; height: 20px; }
+.lk-sw.m-labelled .sw::before { content: "OFF"; position: absolute; right: 8px; top: 0; line-height: 24px; font-size: 10px; font-weight: 800; letter-spacing: .06em; color: var(--muted); }
+.lk-sw.m-labelled .sw.on::before { content: "ON"; right: auto; left: 9px; color: var(--on-accent); }
+.lk-sw.m-labelled .sw.on::after { transform: translateX(36px); }
+
+/* checkbox: square tick */
+.lk-sq.m-big .cb { width: 24px; height: 24px; border-radius: 8px; border-width: 2px; }
+.lk-sq.m-big .cb.on::after { font-size: 16px; }
+.lk-sq.m-big label { gap: 12px; font-size: 15px; }
+.lk-sq.m-soft .cb { border-color: var(--line); background: var(--surface2); }
+.lk-sq.m-soft .cb.on { background: var(--accent-tint); border-color: var(--accent); }
+.lk-sq.m-soft .cb.on::after { color: var(--accent-ink); }
+.lk-sq.m-soft label { padding: 6px 10px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--line); }
+.lk-sq.m-heavy .cb { width: 20px; height: 20px; border: 3px solid var(--accent); border-radius: 2px; background: transparent; }
+.lk-sq.m-heavy .cb.on::after { color: var(--on-accent); font-size: 13px; }
+
+/* colour: dot */
+.lk-dot.m-big .dot-c { width: 32px; height: 32px; border-width: 3px; }
+.lk-dot.m-big .dot-c.on { box-shadow: 0 0 0 3px var(--accent); }
+.lk-dot.m-big .pop { width: 220px !important; }
+.lk-dot.m-tiles .dot-c { width: 26px; height: 26px; border-radius: var(--r-sm); border: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+.lk-dot.m-tiles .dot-c.on { box-shadow: inset 0 0 0 2px var(--surface), 0 0 0 2px var(--text); }
+.lk-dot.m-tiles .dot-c.on::after { content: "✓"; color: #fff; font-weight: 800; text-shadow: 0 0 3px rgba(0,0,0,.6); }
+.lk-dot.m-pills .dot-c { width: 38px; height: 12px; border-radius: 99px; border: 0; }
+.lk-dot.m-pills .dot-c.on { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
+.lk-dot.m-pills .pop { width: 180px !important; }
+.lk-dot.m-pills .swatches { gap: 8px 6px; }
+
+/* colour: hex */
+.lk-hex.m-mono .selbtn { background: var(--surface2); font-family: var(--font-mono, "JetBrains Mono", monospace); text-transform: uppercase; letter-spacing: .06em; border-radius: 4px; }
+.lk-hex.m-mono .dot-c { border-radius: 3px; border: 0; }
+.lk-hex.m-mono .field { font-family: var(--font-mono, "JetBrains Mono", monospace); text-transform: uppercase; background: var(--surface2); border-radius: 4px; }
+.lk-hex.m-big .selbtn { height: 48px; padding: 0 16px; font-size: 15px; gap: 14px; }
+.lk-hex.m-big .selbtn .dot-c { width: 32px !important; height: 32px !important; border-width: 3px; box-shadow: 0 0 0 2px var(--accent); }
+.lk-hex.m-big .field { height: 38px; }
+.lk-hex.m-flat .selbtn { background: transparent; border-width: 0 0 2px; border-color: var(--accent); border-radius: 0; box-shadow: none; padding-left: 2px; }
+.lk-hex.m-flat .dot-c { border-radius: 2px; }
+.lk-hex.m-flat .field { background: transparent; border-width: 0 0 1.5px; border-radius: 0; box-shadow: none; }
+
+/* busy: spinner button */
+.lk-spin.m-soft .btn { background: var(--accent-tint); border-color: transparent; color: var(--accent-ink); box-shadow: none; }
+.lk-spin.m-soft .btn:hover { background: color-mix(in srgb, var(--accent) 24%, transparent); }
+.lk-spin.m-outline .btn { height: 44px; padding: 0 26px; font-size: 15px; background: transparent; border: 2px solid var(--accent); color: var(--accent-ink); box-shadow: none; }
+.lk-spin.m-outline .spin { width: 18px; height: 18px; }
+.lk-spin.m-block, .lk-spin.m-block > div { align-self: stretch; }
+.lk-spin.m-block .btn { width: 100%; height: 42px; border-radius: var(--r-sm); font-weight: 750; letter-spacing: .02em; }
+
+/* busy + unsaved: chips. .file-chip[data-s] = saved | saving */
+.lk-bchip.m-badge .file-chip, .lk-uchip.m-badge .file-chip { padding: 3px 11px 3px 9px; border-radius: 99px; font-weight: 650; background: color-mix(in srgb, #3bb273 20%, transparent); color: color-mix(in srgb, #3bb273 70%, var(--text)); }
+.lk-bchip.m-badge .file-chip[data-s="saving"], .lk-uchip.m-badge .file-chip[data-s="saving"] { background: var(--accent); color: var(--on-accent); }
+.lk-bchip.m-badge .file-chip[data-s="saving"] .dot, .lk-uchip.m-badge .file-chip[data-s="saving"] .dot { background: var(--on-accent); }
+.lk-bchip.m-outline .file-chip { padding: 3px 12px 3px 8px; border: 1.5px solid var(--line); border-radius: 99px; color: var(--text); gap: 8px; }
+.lk-bchip.m-outline .file-chip .dot { width: 10px; height: 10px; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 14%, transparent); }
+.lk-bchip.m-mono .file-chip, .lk-uchip.m-mono .file-chip { font-size: 10.5px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+.lk-bchip.m-mono .file-chip .dot, .lk-uchip.m-mono .file-chip .dot { display: none; }
+.lk-bchip.m-mono .file-chip[data-s="saved"], .lk-uchip.m-mono .file-chip[data-s="saved"] { color: #3bb273; }
+.lk-bchip.m-mono .file-chip[data-s="saving"], .lk-uchip.m-mono .file-chip[data-s="saving"] { color: var(--accent-ink); }
+.lk-uchip.m-dot .file-chip { font-size: 0; gap: 0; }
+.lk-uchip.m-dot .file-chip > :last-child { display: none; }
+.lk-uchip.m-dot .file-chip .dot { width: 14px; height: 14px; box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 14%, transparent); }
+
+/* unsaved: "— Edited" */
+.lk-edit.m-pill .ued { display: inline-block; padding: 1px 9px; border-radius: 99px; background: var(--accent-tint); color: var(--accent-ink); font-weight: 650; font-size: 11.5px; }
+.lk-edit.m-pill .ued::first-letter { color: transparent; font-size: 0; }
+.lk-edit.m-amber .ued { color: #d98a1c; font-weight: 800; letter-spacing: .02em; font-size: 12.5px; }
+.lk-edit.m-amber [data-unsaved].is-dirty .mini-top { box-shadow: inset 4px 0 0 #f0a94e; }
+.lk-edit.m-bar .ued { display: none; }
+.lk-edit.m-bar [data-unsaved] .mini-top { transition: box-shadow var(--t-hover) var(--ease); }
+.lk-edit.m-bar [data-unsaved].is-dirty .mini-top { box-shadow: inset 0 -3px 0 var(--accent); }
+.lk-edit.m-bar [data-unsaved].is-dirty .mini-top > span:nth-child(2) { font-style: italic; }
+
+/* depth sample: three shapes over a busy background */
+.depthdemo { position: relative; height: 230px; border-radius: var(--r-sm); overflow: hidden; display: flex; align-items: flex-start; gap: var(--s3); padding: var(--s3);
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--text) 22%, var(--bg)) 0 10px, color-mix(in srgb, var(--text) 10%, var(--bg)) 10px 20px); }
+.depthdemo .dd-card { padding: 12px; display: flex; flex-direction: column; gap: 2px; width: 28%; }
+.depthdemo .dd-menu { position: static; min-width: 0; width: 30%; margin-top: 10px; }
+.depthdemo .dd-dlg { position: absolute; right: 12px; bottom: 12px; margin: 0; width: 38%; padding: var(--s3); display: flex; flex-direction: column; gap: 2px; }
+.depthdemo .dd-dlg .btns { margin-top: 6px; }
+/* icon weight sample: big icons so stroke weight is visible */
+.icbig { display: flex; flex-wrap: wrap; gap: 14px; }
+.icbig svg { width: 28px; height: 28px; }
+/* long-text tooltip: narrower so the bubble wraps over several lines */
+.tipw[data-tip]::after { max-width: 150px; }

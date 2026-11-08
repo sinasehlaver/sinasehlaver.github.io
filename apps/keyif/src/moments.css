@@ -1,0 +1,64 @@
+/* The done moment + the duty/pleasure styling. Source of truth for both keyif and ui-picker (which links this file),
+   so what you pick is exactly what you get. Tokens only. Every moment ends by 900ms (MOMENT_MS in logic/pick.js). */
+.dm { --kind: var(--accent); --hold: 660ms; --exit: 240ms; position: relative; display: flex; align-items: center; gap: var(--s2); min-width: 0; border-radius: var(--r-sm); }
+.dm-text { flex: 1; min-width: 0; position: relative; display: flex; }
+.dm-glyph { flex: none; width: 1em; text-align: center; font-size: .8em; color: var(--kind); }
+.k-duty .dm-glyph::before { content: "·"; font-weight: 700; }
+.k-joy .dm-glyph::before { content: "✦"; }
+
+/* the round check: finishing, distinct from the kit's square select checkbox */
+.dm-check { position: relative; flex: none; display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--kind) 60%, var(--line)); background: transparent; color: var(--kind); cursor: pointer; transition: background var(--t-hover) var(--ease), border-color var(--t-hover) var(--ease), transform var(--t-press) var(--ease); }
+.dm-check::after { content: ""; position: absolute; inset: -11px; } /* 44px target */
+.dm-check:hover { background: color-mix(in srgb, var(--kind) 16%, transparent); border-color: var(--kind); }
+.dm-check:active { transform: scale(.92); }
+.dm-tick { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+.dm-tick path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.is-done .dm-tick path { stroke-dashoffset: 0; }
+.is-done .dm-check { background: color-mix(in srgb, var(--kind) 22%, transparent); border-color: transparent; }
+
+/* shared timeline: fill, tick draws over the slow duration, row leaves */
+.dm[data-playing] { pointer-events: none; animation: dm-exit var(--exit) var(--ease) var(--hold) forwards; }
+.dm[data-playing] .dm-check { background: var(--kind); border-color: var(--kind); color: var(--on-accent); }
+.dm[data-playing] .dm-tick path { animation: dm-draw var(--t-slow) var(--ease) forwards; }
+@keyframes dm-draw { to { stroke-dashoffset: 0; } }
+@keyframes dm-exit { to { opacity: 0; transform: translateX(-12px) scale(.98); } }
+
+/* settle: the row gives a small breath as the tick lands */
+.dm-settle[data-playing] { animation: dm-settle var(--t-slow) var(--ease), dm-exit var(--exit) var(--ease) var(--hold) forwards; }
+@keyframes dm-settle { 35% { transform: scale(.985); } }
+
+/* wash: warmth spreads across the row, then fades */
+.dm-wash::before { content: ""; position: absolute; inset: -4px -6px; border-radius: inherit; background: color-mix(in srgb, var(--kind) 24%, transparent); transform: scaleX(0); transform-origin: left; pointer-events: none; }
+.dm-wash[data-playing]::before { animation: dm-wash 820ms var(--ease) forwards; }
+@keyframes dm-wash { 0% { transform: scaleX(0); opacity: 1; } 55% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+
+/* ripple: a ring leaves the check */
+.dm-ripple .dm-check::before { content: ""; position: absolute; inset: -1.5px; border-radius: 50%; border: 2px solid var(--kind); opacity: 0; pointer-events: none; }
+.dm-ripple[data-playing] .dm-check::before { animation: dm-ring 760ms cubic-bezier(.3,.6,.5,1) forwards; }
+@keyframes dm-ring { 0% { transform: scale(1); opacity: .9; } 60% { transform: scale(2.8); opacity: .45; } 100% { transform: scale(3.4); opacity: 0; } }
+
+/* sparks: a small burst from the check */
+.dm-spark { position: absolute; left: calc(50% - 2px); top: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background: var(--kind); opacity: 0; pointer-events: none; }
+.dm-sparks[data-playing] .dm-spark { animation: dm-spark 720ms cubic-bezier(.3,.6,.5,1) forwards; }
+@keyframes dm-spark { 0% { opacity: 1; transform: rotate(var(--a)) translateY(-8px) scale(1); } 65% { opacity: .9; transform: rotate(var(--a)) translateY(-26px) scale(.85); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-32px) scale(.4); } }
+
+/* strike: a line is drawn through the words */
+.dm-strike .dm-text::after { content: ""; position: absolute; left: 0; right: 0; top: 52%; height: 1.5px; background: var(--kind); transform: scaleX(0); transform-origin: left; pointer-events: none; }
+.dm-strike[data-playing] .dm-text::after { animation: dm-line var(--t-slow) var(--ease) forwards; }
+@keyframes dm-line { to { transform: scaleX(1); } }
+
+/* float: the row lifts and dissolves, no sideways exit */
+.dm-float[data-playing] { animation: dm-float 900ms var(--ease) forwards; }
+@keyframes dm-float { 35% { transform: translateY(-2px); opacity: 1; } 100% { transform: translateY(-20px); opacity: 0; } }
+
+/* telling duties from pleasures: never colour alone, the glyph is always there */
+.kinds-warm .k-joy { --kind: color-mix(in oklch, var(--accent), var(--danger) 55%); }
+.kinds-tint .k-joy { background: color-mix(in srgb, var(--accent) 9%, transparent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 9%, transparent); }
+.kinds-glyph .k-joy { --kind: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dm[data-playing], .dm[data-playing]::before, .dm[data-playing] * , .dm[data-playing] *::before, .dm[data-playing] *::after { animation: none !important; }
+  .dm[data-playing] { animation: dm-fade 200ms linear forwards !important; }
+  .dm[data-playing] .dm-tick path { stroke-dashoffset: 0; }
+}
+@keyframes dm-fade { to { opacity: 0; } }
