@@ -145,18 +145,22 @@ window.SITE = {
         "source": "pinned"
       },
       {
-        "name": "mahalle",
+        "name": "Way of Life: Rule a Neighbourhood",
         "url": "",
+        "image": "img/project-way-of-life.png",
+        "imageAlt": "Pixel-art street with eight neighbours, five value meters and the first level of the game",
         "description": "A pixel-art game: set the rules of a small Turkish neighbourhood and hear its eight residents react. 12 categories, 36 levels.",
         "source": "manual",
         "live": {
           "label": "Live",
-          "href": "https://sinasehlaver.github.io/apps/mahalle/"
+          "href": "https://sinasehlaver.github.io/apps/way-of-life/"
         }
       },
       {
         "name": "How Computers Work",
         "url": "",
+        "image": "img/project-how-computers-work.png",
+        "imageAlt": "A four-instruction program adding two numbers in registers, beside the chapter list from Lamp to Claude Code",
         "description": "An interactive Turkish/English explainer of how a computer works, built up from a battery and a lamp to a processor and a game.",
         "source": "manual",
         "live": {

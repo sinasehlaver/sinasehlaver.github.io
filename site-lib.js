@@ -20,7 +20,7 @@
     ' *                 stats:[{value:number, suffix, decimals:int, label}]}',
     ' *  experience    {heading, items:[{role, org, period, sub, bullets:[string]}]}',
     ' *  education     {heading, items:[{title, sub, text}]}',
-    ' *  projects      {heading, items:[{name, url, description, source:"manual"|"pinned", live?:{label, href}}]}',
+    ' *  projects      {heading, items:[{name, url, description, source:"manual"|"pinned", live?:{label, href}, image?, imageAlt?}]}',
     ' *                source "pinned" = written by the GitHub pinned-repos sync. A sync may replace',
     ' *                only "pinned" items and must leave "manual" ones alone.',
     ' *  skills        {heading, groups:[{label, items:[string]}], languages}',
@@ -158,6 +158,8 @@
     sect('projects', 'items', function (it, p) {
       str(it.name, p + '.name'); str(it.description, p + '.description'); url(it.url, p + '.url', false);
       if (SOURCES.indexOf(it.source) < 0) e.push(p + '.source must be manual|pinned');
+      if (it.image !== '' && it.image != null && !(isSiteImagePath(it.image) || safeImage(it.image))) e.push(p + '.image invalid');
+      if (it.image && /\.svg(\?|#|$)/i.test(it.image)) e.push(p + '.image must not be svg');
       if (it.live != null) {
         if (!isObj(it.live)) e.push(p + '.live must be an object');
         else { str(it.live.label, p + '.live.label'); url(it.live.href, p + '.live.href', false); if (it.live.href && !/^https?:\/\//i.test(String(it.live.href))) e.push(p + '.live.href must be http or https'); }

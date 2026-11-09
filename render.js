@@ -115,6 +115,13 @@
       if (c.tagName === 'SPAN') c = el(doc, 'div', 'card reveal project');
       var h = el(doc, 'h3', '', s(it.name));
       if (!liveOk && Lib.safeUrl(it.url)) { h.appendChild(doc.createTextNode(' ')); h.appendChild(el(doc, 'span', 'arrow', '↗')); }
+      var psrc = Lib.safeImage(it.image);
+      if (psrc && !/\.svg(\?|#|$)/i.test(psrc)) {
+        var pim = el(doc, 'img', 'thumb');
+        pim.setAttribute('src', psrc); pim.setAttribute('alt', s(it.imageAlt)); pim.setAttribute('loading', 'lazy');
+        pim.setAttribute('width', '640'); pim.setAttribute('height', '360'); pim.setAttribute('decoding', 'async');
+        c.className += ' has-thumb'; c.appendChild(pim);
+      }
       c.appendChild(h);
       c.appendChild(inline(doc, el(doc, 'p'), it.description));
       if (liveOk) {
