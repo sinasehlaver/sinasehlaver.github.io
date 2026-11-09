@@ -155,43 +155,13 @@ window.SITE = {
         }
       },
       {
-        "name": "voltaj",
+        "name": "How Computers Work",
         "url": "",
         "description": "An interactive Turkish/English explainer of how a computer works, built up from a battery and a lamp to a processor and a game.",
         "source": "manual",
         "live": {
           "label": "Live",
-          "href": "https://sinasehlaver.github.io/apps/voltaj/"
-        }
-      },
-      {
-        "name": "plate",
-        "url": "",
-        "description": "House-styled table and cover images for Medium posts: paste from Sheets, Excel or CSV and export PNGs.",
-        "source": "manual",
-        "live": {
-          "label": "Live",
-          "href": "https://sinasehlaver.github.io/apps/plate/"
-        }
-      },
-      {
-        "name": "musicmap",
-        "url": "",
-        "description": "A pan-and-zoom honeycomb map of artists where neighbouring hexes sound alike.",
-        "source": "manual",
-        "live": {
-          "label": "Live",
-          "href": "https://sinasehlaver.github.io/apps/musicmap/"
-        }
-      },
-      {
-        "name": "ui-picker",
-        "url": "",
-        "description": "Live, clickable variants of every UI building block; pick the ones you like and they become the style for new apps.",
-        "source": "manual",
-        "live": {
-          "label": "Live",
-          "href": "https://sinasehlaver.github.io/apps/ui-picker/"
+          "href": "https://sinasehlaver.github.io/apps/how-computers-work/"
         }
       }
     ]
