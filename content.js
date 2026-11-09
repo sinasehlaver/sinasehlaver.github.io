@@ -141,8 +141,8 @@ window.SITE = {
       {
         "name": "company_ticket",
         "url": "https://github.com/sinasehlaver/company_ticket",
-        "description": "",
-        "source": "pinned"
+        "description": "Seat-map ticket sales for the ODTÜ Company musicals: sellers hold and sell seats live from a phone, with roles, per-show reports and backups.",
+        "source": "manual"
       },
       {
         "name": "Way of Life: Rule a Neighbourhood",
@@ -152,7 +152,7 @@ window.SITE = {
         "description": "A pixel-art game: set the rules of a small Turkish neighbourhood and hear its eight residents react. 12 categories, 36 levels.",
         "source": "manual",
         "live": {
-          "label": "Live",
+          "label": "To the site",
           "href": "https://sinasehlaver.github.io/apps/way-of-life/"
         }
       },
@@ -164,7 +164,7 @@ window.SITE = {
         "description": "An interactive Turkish/English explainer of how a computer works, built up from a battery and a lamp to a processor and a game.",
         "source": "manual",
         "live": {
-          "label": "Live",
+          "label": "To the site",
           "href": "https://sinasehlaver.github.io/apps/how-computers-work/"
         }
       }
