@@ -165,7 +165,8 @@ window.SITE = {
         "image": "img/project-claude-pm-board.png",
         "imageAlt": "The claude-pm-board project list: colourful project cards with short descriptors, next steps, open-task counts and Start buttons.",
         "live": {
-          "label": "To the site"
+          "label": "Try the demo",
+          "href": "https://sinasehlaver.github.io/demos/claude-pm-board/"
         }
       },
       {
@@ -176,7 +177,8 @@ window.SITE = {
         "image": "img/project-company-ticket.png",
         "imageAlt": "Ticket sales page for a musical: three show-day tabs, seat-count cards and a colour-tiered seat map with sold seats in crimson.",
         "live": {
-          "label": "To the site"
+          "label": "Try the demo",
+          "href": "https://sinasehlaver.github.io/demos/company_ticket/"
         }
       },
       {
