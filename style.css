@@ -101,7 +101,6 @@ a{color:inherit}
 /* sections */
 section{padding:var(--s-8) 0}
 section>h2{font-size:clamp(1.6rem,4vw,2.1rem);margin-bottom:var(--s-6);display:flex;align-items:baseline;gap:var(--s-3)}
-section>h2 em{font:500 .8125rem var(--mono);color:var(--accent);font-style:normal}
 .subhead{margin:var(--s-8) 0 var(--s-4);font-size:1.25rem}
 .sub{color:var(--muted);font-size:.875rem;margin-bottom:var(--s-2)}
 h3{font-size:1.0625rem}
@@ -184,7 +183,11 @@ footer{padding-top:var(--s-6);padding-bottom:var(--s-8);color:var(--muted);font-
 .timeline .more{margin-top:var(--s-1)}
 .timeline .more summary{cursor:pointer;color:var(--muted);font:500 .75rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .timeline .more summary:hover{color:var(--accent)}
-.edu{margin:var(--s-5) 0 0;color:var(--muted);font-size:.875rem}
+.edu-h{margin:var(--s-8,3rem) 0 var(--s-4)}
+.edu-list{list-style:none;margin:0;padding:0;display:grid;gap:var(--s-4);grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.edu-list li{padding:var(--s-4) var(--s-4) var(--s-4) calc(var(--s-4) + 3px);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:12px;background:linear-gradient(var(--accent-tint),var(--accent-tint)),var(--surface2);box-shadow:inset 3px 0 0 var(--accent),var(--shadow-sm)}
+.edu-list h4{margin:0 0 var(--s-1);font-size:1rem}
+.edu-text{margin:var(--s-2) 0 0;color:color-mix(in srgb,var(--text) 78%,var(--muted));font-size:.875rem}
 .tools-line{color:var(--muted);font-size:.9375rem;margin:0}
 
 /* beyond embeds: facade auto-loads on scroll (click = fallback), then iframe */
@@ -204,4 +207,5 @@ footer{padding-top:var(--s-6);padding-bottom:var(--s-8);color:var(--muted);font-
 .card.project .thumb{width:calc(100% + 2 * var(--s-6));margin:calc(-1 * var(--s-6)) calc(-1 * var(--s-6)) var(--s-4)}
 
 /* line breaks typed in the editor (Enter) in plain-text elements */
-.eyebrow,.sub,.edu,.row h3,.card h3,footer p{white-space:pre-line}
+.eyebrow,.sub,.edu-text,.edu-list h4,.row h3,.card h3,footer p{white-space:pre-line}
+[hidden]{display:none!important}

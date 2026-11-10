@@ -21,6 +21,7 @@
     ' *                 ctas:[{label, href, style:"primary"|"default"}],',
     ' *                 stats:[{value:number, suffix, decimals:int, label}]}',
     ' *  theme         (optional) {preset:"orange"|"teal"|"violet"|"green"|"rose"|"blue", accent:"" | "#rrggbb" (custom accent, overrides preset)}',
+    ' *  langSwitch    (optional) boolean; true = show the TR/EN switch on the site. Absent/false = switch hidden and the site always renders English (set from the editor, Colours & site).',
     ' *  experience    {heading, items:[{role, org, period, sub, bullets:[string]}]}',
     ' *  education     {heading, items:[{title, sub, text}]}',
     ' *  projects      {heading, items:[{name, url, description, source:"manual"|"pinned", live?:{label, href}, image?, imageAlt?}]}',
@@ -37,6 +38,7 @@
     ' *                  iframed: renders an "Open channel" card); instagram https://www.instagram.com/(p|reel)/SHORTCODE/.',
     ' *                  Nothing third-party loads until the embed scrolls into view. YouTube refuses playback from file:// (error 153): works when hosted.',
     ' *  contact       {heading, intro, links:[{label, href, style:"primary"|"default"}]}',
+    ' *  Sections experience/education/projects/skills/beyond/contact each take an optional boolean `hidden` (absent = visible; true = not rendered, nav link hidden; set from the editor).',
     ' *  footer        {text}',
     ' *  tr            (optional) Turkish overlay: a PARTIAL copy of the content above, text fields only (meta, hero incl. prefix/words,',
     ' *                headings, experience/education/projects/skills/beyond/contact text, footer). Arrays overlay by index; projects.items',
@@ -138,6 +140,7 @@
         if (d.theme.accent != null && d.theme.accent !== '' && !(typeof d.theme.accent === 'string' && /^#[0-9a-fA-F]{6}$/.test(d.theme.accent))) e.push('theme.accent must be empty or #rrggbb');
       }
     }
+    if (d.langSwitch != null && typeof d.langSwitch !== 'boolean') e.push('langSwitch must be a boolean');
     var h = d.hero;
     if (!isObj(h)) e.push('hero missing');
     else {
@@ -173,6 +176,7 @@
     function sect(name, listKey, item) {
       var s = d[name];
       if (!isObj(s)) return e.push(name + ' missing');
+      if (s.hidden != null && typeof s.hidden !== 'boolean') e.push(name + '.hidden must be a boolean');
       str(s.heading, name + '.heading');
       arr(s[listKey], name + '.' + listKey).forEach(function (it, i) {
         var p = name + '.' + listKey + '[' + i + ']';
@@ -192,7 +196,7 @@
       if (it.image && /\.svg(\?|#|$)/i.test(it.image)) e.push(p + '.image must not be svg');
       if (it.live != null) {
         if (!isObj(it.live)) e.push(p + '.live must be an object');
-        else { str(it.live.label, p + '.live.label'); url(it.live.href, p + '.live.href', false); if (it.live.href && !/^https?:\/\//i.test(String(it.live.href))) e.push(p + '.live.href must be http or https'); }
+        else { if (it.live.label != null) str(it.live.label, p + '.live.label'); url(it.live.href, p + '.live.href', false); if (it.live.href && !/^https?:\/\//i.test(String(it.live.href))) e.push(p + '.live.href must be http or https'); }
       }
     });
     sect('skills', 'groups', function (it, p) {
@@ -225,7 +229,7 @@
   /* ---- Turkish (or any) text overlay: d.tr is a PARTIAL copy of the base content, text fields only. ----
      Non-text keys (urls, images, embeds, source, theme ...) are never taken from the overlay. Arrays overlay by index;
      projects items may carry `match` (base name or url) so a pinned sync that reorders items cannot misalign them. */
-  var NONTEXT = { href: 1, url: 1, image: 1, embed: 1, source: 1, style: 1, kind: 1, value: 1, decimals: 1, suffix: 1, provider: 1, theme: 1, version: 1, tr: 1, match: 1 };
+  var NONTEXT = { hidden: 1, langSwitch: 1, href: 1, url: 1, image: 1, embed: 1, source: 1, style: 1, kind: 1, value: 1, decimals: 1, suffix: 1, provider: 1, theme: 1, version: 1, tr: 1, match: 1 };
   var TR_MAX = 2000;
   function trItemFor(baseItem, ovArr, i) {
     ovArr = Array.isArray(ovArr) ? ovArr : [];

@@ -14,6 +14,7 @@
  *                 ctas:[{label, href, style:"primary"|"default"}],
  *                 stats:[{value:number, suffix, decimals:int, label}]}
  *  theme         (optional) {preset:"orange"|"teal"|"violet"|"green"|"rose"|"blue", accent:"" | "#rrggbb" (custom accent, overrides preset)}
+ *  langSwitch    (optional) boolean; true = show the TR/EN switch on the site. Absent/false = switch hidden and the site always renders English (set from the editor, Colours & site).
  *  experience    {heading, items:[{role, org, period, sub, bullets:[string]}]}
  *  education     {heading, items:[{title, sub, text}]}
  *  projects      {heading, items:[{name, url, description, source:"manual"|"pinned", live?:{label, href}, image?, imageAlt?}]}
@@ -30,6 +31,7 @@
  *                  iframed: renders an "Open channel" card); instagram https://www.instagram.com/(p|reel)/SHORTCODE/.
  *                  Nothing third-party loads until the embed scrolls into view. YouTube refuses playback from file:// (error 153): works when hosted.
  *  contact       {heading, intro, links:[{label, href, style:"primary"|"default"}]}
+ *  Sections experience/education/projects/skills/beyond/contact each take an optional boolean `hidden` (absent = visible; true = not rendered, nav link hidden; set from the editor).
  *  footer        {text}
  *  tr            (optional) Turkish overlay: a PARTIAL copy of the content above, text fields only (meta, hero incl. prefix/words,
  *                headings, experience/education/projects/skills/beyond/contact text, footer). Arrays overlay by index; projects.items
@@ -50,10 +52,23 @@ window.SITE = {
     },
     "prefix": "I turn",
     "words": [
-      "small annoyances into small apps",
-      "spreadsheets into real tools",
-      "ML experiments into production",
-      "rehearsal chaos into a calendar"
+      {
+        "text": "ML from notebook to production",
+        "prefix": "I ship"
+      },
+      {
+        "text": "repetitive chores into handy scripts",
+        "prefix": "I automate"
+      },
+      "hard ideas into sites that teach",
+      {
+        "text": "music, on and off stage",
+        "prefix": "I play"
+      },
+      {
+        "text": "problems with whatever tool fits",
+        "prefix": "I solve"
+      }
     ],
     "lead": "Data scientist at MigrosOne (via StartupHeroes), taking ML to production.\nOff the clock I'm a problem solver with whatever tool fits: web apps, handy scripts, sites that teach, 3D-printed parts, small tools that make everyday life easier. Music is the other half: I play, and I mix live sound as a Tonmeister.",
     "ctas": [
@@ -61,11 +76,6 @@ window.SITE = {
         "label": "Get in touch",
         "href": "#contact",
         "style": "primary"
-      },
-      {
-        "label": "Ask for my CV",
-        "href": "#contact",
-        "style": "default"
       }
     ],
     "stats": []
@@ -149,7 +159,10 @@ window.SITE = {
         "description": "A local board for running Claude Code across many projects, kept in plain Markdown files that you and your agents both read and write.",
         "source": "pinned",
         "image": "img/project-claude-pm-board.png",
-        "imageAlt": "The claude-pm-board project list: colourful project cards with short descriptors, next steps, open-task counts and Start buttons."
+        "imageAlt": "The claude-pm-board project list: colourful project cards with short descriptors, next steps, open-task counts and Start buttons.",
+        "live": {
+          "label": "To the site"
+        }
       },
       {
         "name": "company_ticket",
@@ -157,7 +170,10 @@ window.SITE = {
         "description": "Seat-map ticket sales for the ODTÜ Company musicals: sellers hold and sell seats live from a phone, with roles, per-show reports and backups.",
         "source": "manual",
         "image": "img/project-company-ticket.png",
-        "imageAlt": "Ticket sales page for a musical: three show-day tabs, seat-count cards and a colour-tiered seat map with sold seats in crimson."
+        "imageAlt": "Ticket sales page for a musical: three show-day tabs, seat-count cards and a colour-tiered seat map with sold seats in crimson.",
+        "live": {
+          "label": "To the site"
+        }
       },
       {
         "name": "pergel",
@@ -371,9 +387,6 @@ window.SITE = {
       "ctas": [
         {
           "label": "İletişime geç"
-        },
-        {
-          "label": "CV için yaz"
         }
       ]
     },

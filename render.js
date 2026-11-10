@@ -48,9 +48,12 @@
     return n;
   }
   function heading(doc, sec, n, data) {
-    var h = el(doc, 'h2', 'reveal'), em = el(doc, 'em', '', (n < 10 ? '0' : '') + n);
-    h.appendChild(em); h.appendChild(doc.createTextNode(' ' + s(data.heading)));
+    var h = el(doc, 'h2', 'reveal', s(data.heading));
     sec.appendChild(h);
+  }
+  function setHidden(n, on) {
+    if (on) n.setAttribute('hidden', '');
+    else if (n.removeAttribute) n.removeAttribute('hidden');
   }
   function clear(n) { while (n && n.firstChild) n.removeChild(n.firstChild); }
   function q(doc, sel) { return doc.querySelector(sel); }
@@ -102,6 +105,7 @@
 
   function experience(doc, d, sec) {
     var x = o(d.experience);
+    if (x.hidden === true) { education(doc, d, sec); return; }
     heading(doc, sec, 3, x);
     var ol = el(doc, 'ol', 'timeline compact');
     a(x.items).forEach(function (it) {
@@ -121,11 +125,22 @@
       ol.appendChild(li);
     });
     sec.appendChild(ol);
+    education(doc, d, sec);
+  }
+  function education(doc, d, sec) {
     var e = o(d.education);
-    var ed = el(doc, 'p', 'edu reveal');
-    ed.appendChild(el(doc, 'b', '', s(e.heading) + ': '));
-    ed.appendChild(doc.createTextNode(a(e.items).map(function (it) { it = o(it); return s(it.title) + (it.sub ? ' (' + s(it.sub) + ')' : ''); }).join(' · ')));
-    sec.appendChild(ed);
+    if (e.hidden === true) return;
+    sec.appendChild(el(doc, 'h3', 'edu-h reveal', s(e.heading)));
+    var eul = el(doc, 'ul', 'edu-list');
+    a(e.items).forEach(function (it) {
+      it = o(it);
+      var li = el(doc, 'li', 'reveal');
+      li.appendChild(el(doc, 'h4', '', s(it.title)));
+      if (it.sub) li.appendChild(el(doc, 'p', 'sub', s(it.sub)));
+      if (it.text) li.appendChild(el(doc, 'p', 'edu-text', s(it.text)));
+      eul.appendChild(li);
+    });
+    sec.appendChild(eul);
   }
 
   function projects(doc, d, sec) {
@@ -163,9 +178,12 @@
   function skills(doc, d, sec) {
     var k = o(d.skills);
     heading(doc, sec, 4, k);
-    var parts = a(k.groups).map(o).filter(function (g) { return g.label !== 'Languages'; })
-      .reduce(function (acc, g) { return acc.concat(a(g.items).map(s)); }, []);
-    sec.appendChild(el(doc, 'p', 'tools-line reveal', parts.join(' · ')));
+    a(k.groups).map(o).filter(function (g) { return g.label !== 'Languages'; }).forEach(function (g) {
+      var row = el(doc, 'div', 'chips reveal');
+      row.appendChild(el(doc, 'b', '', s(g.label)));
+      a(g.items).forEach(function (t) { row.appendChild(el(doc, 'span', '', s(t))); });
+      sec.appendChild(row);
+    });
     if (k.languages) sec.appendChild(el(doc, 'p', 'sub reveal', s(k.languages)));
   }
 
@@ -279,6 +297,7 @@
     d = Lib.localize(o(d), LANG);
     chrome(doc, LANG);
     applyTheme(doc, d.theme);
+    var lsw = q(doc, '.lang'); if (lsw) { if (d.langSwitch === true) lsw.removeAttribute('hidden'); else lsw.setAttribute('hidden', ''); }
     var m = o(d.meta);
     if (m.title) doc.title = s(m.title);
     var md = q(doc, 'meta[name=description]');
@@ -287,7 +306,11 @@
     map.forEach(function (r) {
       var n = q(doc, r[0]); if (!n) return;
       if (r[1] === hero) return hero(doc, d, n);
-      clear(n); r[1](doc, d, n, opts);
+      clear(n);
+      var off = r[1] !== hero && (r[0] === '#experience' ? o(d.experience).hidden === true && o(d.education).hidden === true : o(d[r[0].slice(1)]).hidden === true);
+      setHidden(n, off);
+      Array.prototype.forEach.call(doc.querySelectorAll ? doc.querySelectorAll('.nav-links a[href="' + r[0] + '"]') : [], function (l) { setHidden(l, off); });
+      if (!off) r[1](doc, d, n, opts);
     });
     var f = q(doc, 'footer');
     if (f) { clear(f); f.appendChild(el(doc, 'p', '', s(o(d.footer).text))); }
@@ -321,7 +344,7 @@
     var doc = win.document;
     if (!doc || !win.SITE) return;
     var preview = win.parent !== win && /[?&]preview(=|&|$)/.test(win.location.search);
-    var lang = preview ? 'en' : pickLang(win);
+    var lang = preview || win.SITE.langSwitch !== true ? 'en' : pickLang(win);
     renderAll(doc, win.SITE, { lang: lang });
     // Editor preview: same page inside a sandboxed iframe, driven by postMessage (content is still rendered safely).
     if (win.parent !== win && /[?&]preview(=|&|$)/.test(win.location.search)) {
