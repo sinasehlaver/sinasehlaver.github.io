@@ -10,6 +10,15 @@
     try { localStorage.setItem('theme', next); } catch (e) {}
   });
 
+  // language switch: store the choice, drop any ?lang= override, reload (render.js renders in that language)
+  $$('.lang button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var l = b.getAttribute('data-lang') === 'tr' ? 'tr' : 'en';
+      try { localStorage.setItem('lang', l); } catch (e) {}
+      location.href = location.pathname + location.hash;
+    });
+  });
+
   // scroll progress + nav state
   var bar = $('.progress'), nav = $('.nav');
   function onScroll() {
@@ -51,7 +60,9 @@
 
   // typed role line
   var typed = $('.typed'), words = typed.dataset.words.split('|');
-  if (reduce) { typed.textContent = words[0]; }
+  var pre = $('.role .pre'), prefixes = (typed.dataset.prefixes || '').split('|');
+  function setPre(i) { if (pre && prefixes[i]) pre.textContent = prefixes[i] + ' '; }
+  if (reduce) { typed.textContent = words[0]; setPre(0); }
   else {
     var w = 0, c = 0, del = false;
     (function tick() {
@@ -60,16 +71,15 @@
       typed.textContent = word.slice(0, c);
       var wait = del ? 28 : 65;
       if (!del && c === word.length) { del = true; wait = 1500; }
-      else if (del && c === 0) { del = false; w = (w + 1) % words.length; wait = 350; }
+      else if (del && c === 0) { del = false; w = (w + 1) % words.length; setPre(w); wait = 350; }
       setTimeout(tick, wait);
     })();
   }
 
-  // click-to-load embeds: the iframe is created only after a click, and only for the two allowed hosts
+  // embeds: the facade becomes an iframe when it nears the viewport (click is the fallback), only for the two allowed hosts
   var EMBED_OK = /^https:\/\/(www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}|www\.instagram\.com\/(p|reel)\/[A-Za-z0-9_-]{5,30}\/embed\/)$/;
-  document.addEventListener('click', function (e) {
-    var b = e.target.closest && e.target.closest('button.embed-facade');
-    if (!b) return;
+  function load(b) {
+    if (!b.isConnected) return;
     var src = b.getAttribute('data-embed-src') || '';
     if (!EMBED_OK.test(src)) return;
     var f = document.createElement('iframe');
@@ -81,7 +91,21 @@
     f.setAttribute('allow', f.className.indexOf('youtube') > 0 ? 'encrypted-media; picture-in-picture; fullscreen' : 'encrypted-media; fullscreen');
     f.setAttribute('allowfullscreen', '');
     b.replaceWith(f);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('button.embed-facade');
+    if (b) load(b);
   });
+  if ('IntersectionObserver' in window) {
+    var eio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        eio.unobserve(en.target);
+        load(en.target);
+      });
+    }, { rootMargin: '200px' });
+    document.querySelectorAll('button.embed-facade[data-embed-src]').forEach(function (b) { eio.observe(b); });
+  }
 
   // cursor spotlight on cards
   $$('.card').forEach(function (card) {

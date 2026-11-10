@@ -5,6 +5,20 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else { root.SiteRender = api; api.boot(root); }
 })(typeof self !== 'undefined' ? self : this, function (Lib) {
+  // Static UI strings (not in content.js). English is the key; `tr` is the Turkish table.
+  var TR_UI = {
+    'I build': 'İşim gücüm:', 'Repo ↗': 'Kod ↗', 'Live': 'Canlı', 'Details': 'Ayrıntılar',
+    'Open channel': 'Kanalı aç', 'Opens {n} in a new page': '{n} yeni sekmede açılır',
+    'Loads content from {n}': 'İçerik {n} üzerinden yüklenir', 'Loading {n}…': '{n} yükleniyor…',
+    'Play {n} {k}': '{n} {k} oynat', 'reel': 'reel', 'post': 'gönderi', 'video': 'video',
+    'Projects': 'Projeler', 'Beyond': 'İş Dışında', 'Experience': 'Deneyim', 'Tools': 'Araçlar', 'Contact': 'İletişim',
+    'Primary': 'Ana gezinme', 'Toggle light/dark theme': 'Açık/koyu temayı değiştir', 'Language': 'Dil'
+  };
+  var LANG = 'en';
+  function ui(lang, key, vars) {
+    var t = lang === 'tr' && Object.prototype.hasOwnProperty.call(TR_UI, key) ? TR_UI[key] : key;
+    return t.replace(/\{(\w+)\}/g, function (m, k) { return vars && vars[k] != null ? vars[k] : m; });
+  }
   function s(v) { return typeof v === 'string' ? v : (v == null ? '' : String(v)); }
   function a(v) { return Array.isArray(v) ? v : []; }
   function o(v) { return v && typeof v === 'object' ? v : {}; }
@@ -18,8 +32,12 @@
   // `code` spans -> <code>; everything else literal text.
   function inline(doc, parent, text) {
     s(text).split('`').forEach(function (part, i) {
-      if (i % 2 === 1) parent.appendChild(el(doc, 'code', '', part));
-      else if (part) parent.appendChild(doc.createTextNode(part));
+      if (i % 2 === 1) { parent.appendChild(el(doc, 'code', '', part)); return; }
+      // Line breaks (Enter in the editor) -> <br>; DOM APIs only.
+      part.split(/\r?\n/).forEach(function (line, j) {
+        if (j > 0) parent.appendChild(doc.createElement('br'));
+        if (line) parent.appendChild(doc.createTextNode(line));
+      });
     });
     return parent;
   }
@@ -48,9 +66,16 @@
     h1.appendChild(el(doc, 'span', 'grad', s(nm.accent)));
     node.appendChild(h1);
     var role = el(doc, 'p', 'role reveal');
-    role.appendChild(doc.createTextNode('I build '));
+    var base = s(h.prefix).trim() || ui(LANG, 'I build');
+    var ws = a(h.words).map(function (w) {
+      var t = typeof w === 'string' ? w : s(o(w).text), p = typeof w === 'string' ? '' : s(o(w).prefix);
+      return { t: t.trim(), p: p.trim() || base };
+    }).filter(function (w) { return w.t; });
+    var pre = el(doc, 'span', 'pre', (ws.length ? ws[0].p : base) + ' ');
+    role.appendChild(pre);
     var typed = el(doc, 'span', 'typed');
-    typed.setAttribute('data-words', a(h.words).map(s).filter(Boolean).join('|') || ' ');
+    typed.setAttribute('data-words', ws.map(function (w) { return w.t; }).join('|') || ' ');
+    typed.setAttribute('data-prefixes', ws.map(function (w) { return w.p; }).join('|') || base);
     role.appendChild(typed); role.appendChild(el(doc, 'span', 'caret'));
     node.appendChild(role);
     node.appendChild(inline(doc, el(doc, 'p', 'lead reveal'), h.lead));
@@ -90,7 +115,7 @@
       a(it.bullets).forEach(function (b) { ul.appendChild(inline(doc, el(doc, 'li'), b)); });
       if (a(it.bullets).length) {
         var det = el(doc, 'details', 'more');
-        det.appendChild(el(doc, 'summary', '', 'Details'));
+        det.appendChild(el(doc, 'summary', '', ui(LANG, 'Details')));
         det.appendChild(ul); li.appendChild(det);
       }
       ol.appendChild(li);
@@ -126,8 +151,8 @@
       c.appendChild(inline(doc, el(doc, 'p'), it.description));
       if (liveOk) {
         var row = el(doc, 'div', 'cta');
-        if (Lib.safeUrl(it.url)) { var rb = anchor(doc, 'btn small', it.url); rb.textContent = 'Repo ↗'; row.appendChild(rb); }
-        var lb = anchor(doc, 'btn small primary', lv.href); lb.textContent = (s(lv.label) || 'Live') + ' ↗'; row.appendChild(lb);
+        if (Lib.safeUrl(it.url)) { var rb = anchor(doc, 'btn small', it.url); rb.textContent = ui(LANG, 'Repo ↗'); row.appendChild(rb); }
+        var lb = anchor(doc, 'btn small primary', lv.href); lb.textContent = (s(lv.label) || ui(LANG, 'Live')) + ' ↗'; row.appendChild(lb);
         c.appendChild(row);
       }
       grid.appendChild(c);
@@ -144,7 +169,7 @@
     if (k.languages) sec.appendChild(el(doc, 'p', 'sub reveal', s(k.languages)));
   }
 
-  // Facade only: nothing third-party loads until script.js turns the button into an iframe on click.
+  // Facade only: nothing third-party loads until script.js turns the button into an iframe (when scrolled near the viewport; click is the fallback).
   function embed(doc, card, e) {
     e = o(e);
     var p = Lib.parseEmbed(e.provider, e.url);
@@ -153,8 +178,8 @@
     if (p.type === 'channel') {
       var ch = anchor(doc, 'embed-facade embed-' + p.provider + ' embed-channel', p.href);
       ch.appendChild(el(doc, 'span', 'embed-play', '\u2197'));
-      ch.appendChild(el(doc, 'span', 'embed-label', 'Open channel'));
-      ch.appendChild(el(doc, 'small', 'embed-note', 'Opens ' + name + ' in a new page'));
+      ch.appendChild(el(doc, 'span', 'embed-label', ui(LANG, 'Open channel')));
+      ch.appendChild(el(doc, 'small', 'embed-note', ui(LANG, 'Opens {n} in a new page', { n: name })));
       card.appendChild(ch);
       return;
     }
@@ -162,10 +187,10 @@
     b.setAttribute('type', 'button');
     b.setAttribute('data-embed-src', p.src);
     b.setAttribute('data-embed-provider', p.provider);
-    b.setAttribute('aria-label', 'Load ' + name + ' ' + (p.type === 'reel' ? 'reel' : p.type === 'post' ? 'post' : 'video'));
+    b.setAttribute('aria-label', ui(LANG, 'Play {n} {k}', { n: name, k: ui(LANG, p.type === 'reel' ? 'reel' : p.type === 'post' ? 'post' : 'video') }));
     b.appendChild(el(doc, 'span', 'embed-play', '\u25B6'));
-    b.appendChild(el(doc, 'span', 'embed-label', 'Click to load ' + name));
-    b.appendChild(el(doc, 'small', 'embed-note', 'Loads content from ' + (p.provider === 'youtube' ? 'youtube-nocookie.com' : 'instagram.com')));
+    b.appendChild(el(doc, 'span', 'embed-label', ui(LANG, 'Loading {n}…', { n: name })));
+    b.appendChild(el(doc, 'small', 'embed-note', ui(LANG, 'Loads content from {n}', { n: p.provider === 'youtube' ? 'youtube-nocookie.com' : 'instagram.com' })));
     card.appendChild(b);
   }
 
@@ -212,8 +237,48 @@
   }
 
   // Render everything into `doc`. opts.imageOverrides: {"img/x.png": "data:image/png;base64,..."} (editor preview only).
+  var PRESETS = ['orange', 'teal', 'violet', 'green', 'rose', 'blue'];
+  function lum(hex) {
+    var c = [1, 3, 5].map(function (i) { var v = parseInt(hex.substr(i, 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  function inkFor(hex) { return lum(hex) > 0.35 ? '#111111' : '#ffffff'; }
+  function darken(hex, k) { return '#' + [1, 3, 5].map(function (i) { var v = Math.round(parseInt(hex.substr(i, 2), 16) * k).toString(16); return v.length < 2 ? '0' + v : v; }).join(''); }
+  // theme.preset -> data-accent (CSS blocks in style.css); theme.accent (#rrggbb) -> data-accent=custom + --accent-c vars (CSS derives the rest, so the light/dark toggle needs no re-apply).
+  function applyTheme(doc, t) {
+    var root = doc.documentElement; if (!root || !root.dataset) return;
+    t = o(t);
+    var custom = typeof t.accent === 'string' && /^#[0-9a-fA-F]{6}$/.test(t.accent) ? t.accent.toLowerCase() : '';
+    var p = PRESETS.indexOf(t.preset) > 0 ? t.preset : '';
+    var props = ['--accent-c', '--accent-ink-c', '--accent-ink-lc'];
+    if (custom) {
+      root.dataset.accent = 'custom';
+      root.style.setProperty('--accent-c', custom);
+      root.style.setProperty('--accent-ink-c', inkFor(custom));
+      root.style.setProperty('--accent-ink-lc', inkFor(darken(custom, 0.78)));
+    } else {
+      props.forEach(function (k) { root.style.removeProperty(k); });
+      if (p) root.dataset.accent = p; else delete root.dataset.accent;
+    }
+  }
+
+  // Static shell strings: <html lang>, nav labels, aria-labels, language buttons.
+  function chrome(doc, lang) {
+    var root = doc.documentElement; if (root && root.setAttribute) root.setAttribute('lang', lang);
+    var nav = q(doc, '.nav'); if (nav) nav.setAttribute('aria-label', ui(lang, 'Primary'));
+    Array.prototype.forEach.call(doc.querySelectorAll ? doc.querySelectorAll('.nav-links a') : [], function (n) {
+      var en = n.getAttribute('data-en') || n.textContent; n.setAttribute('data-en', en); n.textContent = ui(lang, en);
+    });
+    var th = q(doc, '.theme'); if (th) th.setAttribute('aria-label', ui(lang, 'Toggle light/dark theme'));
+    var lg = q(doc, '.lang'); if (lg) lg.setAttribute('aria-label', ui(lang, 'Language'));
+    Array.prototype.forEach.call(doc.querySelectorAll ? doc.querySelectorAll('.lang button') : [], function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === lang)); });
+  }
+
   function renderAll(doc, d, opts) {
-    d = o(d);
+    LANG = opts && opts.lang === 'tr' ? 'tr' : 'en';
+    d = Lib.localize(o(d), LANG);
+    chrome(doc, LANG);
+    applyTheme(doc, d.theme);
     var m = o(d.meta);
     if (m.title) doc.title = s(m.title);
     var md = q(doc, 'meta[name=description]');
@@ -245,10 +310,19 @@
     });
   }
 
+  // ?lang=tr|en wins, then the saved choice, then English.
+  function pickLang(win) {
+    var m = /[?&]lang=(tr|en)(&|#|$)/.exec(win.location.search || ''), v = m ? m[1] : '';
+    if (!v) { try { v = win.localStorage.getItem('lang'); } catch (e) { v = ''; } }
+    return v === 'tr' ? 'tr' : 'en';
+  }
+
   function boot(win) {
     var doc = win.document;
     if (!doc || !win.SITE) return;
-    renderAll(doc, win.SITE);
+    var preview = win.parent !== win && /[?&]preview(=|&|$)/.test(win.location.search);
+    var lang = preview ? 'en' : pickLang(win);
+    renderAll(doc, win.SITE, { lang: lang });
     // Editor preview: same page inside a sandboxed iframe, driven by postMessage (content is still rendered safely).
     if (win.parent !== win && /[?&]preview(=|&|$)/.test(win.location.search)) {
       doc.documentElement.classList.add('preview');
@@ -261,7 +335,7 @@
         if (!m || typeof m !== 'object') return;
         if (m.type === 'site:update' && m.data && typeof m.data === 'object') {
           var y = win.scrollY;
-          renderAll(doc, m.data, { imageOverrides: m.images });
+          renderAll(doc, m.data, { imageOverrides: m.images, lang: m.lang === 'tr' ? 'tr' : 'en' });
           settle(doc);
           win.scrollTo(0, y);
         } else if (m.type === 'site:theme') {
@@ -274,5 +348,5 @@
     }
   }
 
-  return { renderAll: renderAll, settle: settle, boot: boot, inline: inline };
+  return { renderAll: renderAll, ui: ui, pickLang: pickLang, settle: settle, boot: boot, inline: inline };
 });

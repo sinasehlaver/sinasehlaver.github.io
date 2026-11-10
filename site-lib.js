@@ -15,9 +15,12 @@
     ' * SCHEMA (version 1)',
     ' *  version       1',
     ' *  meta          {title, description}',
-    ' *  hero          {eyebrow, name:{first, accent}, words:[string] (typed line), lead,',
+    ' *  hero          {eyebrow, name:{first, accent}, prefix (plain text before the typed words, default "I build"),',
+    ' *                 words:[string | {text, prefix}] (typed line; an object\'s optional prefix',
+    ' *                 replaces hero.prefix for that word; max 80 chars, no "|"), lead,',
     ' *                 ctas:[{label, href, style:"primary"|"default"}],',
     ' *                 stats:[{value:number, suffix, decimals:int, label}]}',
+    ' *  theme         (optional) {preset:"orange"|"teal"|"violet"|"green"|"rose"|"blue", accent:"" | "#rrggbb" (custom accent, overrides preset)}',
     ' *  experience    {heading, items:[{role, org, period, sub, bullets:[string]}]}',
     ' *  education     {heading, items:[{title, sub, text}]}',
     ' *  projects      {heading, items:[{name, url, description, source:"manual"|"pinned", live?:{label, href}, image?, imageAlt?}]}',
@@ -30,11 +33,15 @@
     ' *                link: {label:"", href:""} means no link',
     ' *                embed (optional): {provider:"youtube"|"instagram", url}; url "" or absent = none. Strict allowlist:',
     ' *                  youtube https://www.youtube.com/watch?v=ID | https://youtu.be/ID | https://www.youtube.com/embed/ID',
-    ' *                  (click-to-load facade -> youtube-nocookie.com) or channel https://www.youtube.com/@handle (cannot be',
+    ' *                  (facade, auto-loaded when scrolled into view -> youtube-nocookie.com) or channel https://www.youtube.com/@handle (cannot be',
     ' *                  iframed: renders an "Open channel" card); instagram https://www.instagram.com/(p|reel)/SHORTCODE/.',
-    ' *                  Nothing third-party loads before the click. YouTube refuses playback from file:// (error 153): works when hosted.',
+    ' *                  Nothing third-party loads until the embed scrolls into view. YouTube refuses playback from file:// (error 153): works when hosted.',
     ' *  contact       {heading, intro, links:[{label, href, style:"primary"|"default"}]}',
     ' *  footer        {text}',
+    ' *  tr            (optional) Turkish overlay: a PARTIAL copy of the content above, text fields only (meta, hero incl. prefix/words,',
+    ' *                headings, experience/education/projects/skills/beyond/contact text, footer). Arrays overlay by index; projects.items',
+    ' *                entries may carry `match` (base name or url) so a pinned sync cannot misalign them. Urls, images, embeds, source,',
+    ' *                theme always come from the base. A missing/empty value falls back to English. Site: TR/EN button, ?lang=tr|en.',
     ' */'
   ].join('\n');
 
@@ -109,6 +116,7 @@
     return { data: JSON.parse(body), prefix: text.slice(0, m.index).replace(/\s+$/, '') };
   }
 
+  var THEME_PRESETS = ['orange', 'teal', 'violet', 'green', 'rose', 'blue'];
   function isObj(x) { return x && typeof x === 'object' && !Array.isArray(x); }
 
   // Returns a list of human-readable problems (empty = valid).
@@ -123,12 +131,34 @@
     if (!isObj(d)) return ['content is not an object'];
     if (d.version !== 1) e.push('version must be 1');
     if (!isObj(d.meta)) e.push('meta missing'); else { str(d.meta.title, 'meta.title'); str(d.meta.description, 'meta.description'); }
+    if (d.theme != null) {
+      if (!isObj(d.theme)) e.push('theme must be an object');
+      else {
+        if (d.theme.preset != null && THEME_PRESETS.indexOf(d.theme.preset) < 0) e.push('theme.preset must be one of ' + THEME_PRESETS.join(', '));
+        if (d.theme.accent != null && d.theme.accent !== '' && !(typeof d.theme.accent === 'string' && /^#[0-9a-fA-F]{6}$/.test(d.theme.accent))) e.push('theme.accent must be empty or #rrggbb');
+      }
+    }
     var h = d.hero;
     if (!isObj(h)) e.push('hero missing');
     else {
       str(h.eyebrow, 'hero.eyebrow'); str(h.lead, 'hero.lead');
       if (!isObj(h.name)) e.push('hero.name missing'); else { str(h.name.first, 'hero.name.first'); str(h.name.accent, 'hero.name.accent'); }
-      arr(h.words, 'hero.words').forEach(function (w, i) { str(w, 'hero.words[' + i + ']'); if (typeof w === 'string' && w.indexOf('|') >= 0) e.push('hero.words[' + i + '] must not contain "|"'); });
+      if (h.prefix != null) str(h.prefix, 'hero.prefix');
+      if (typeof h.prefix === 'string') { if (h.prefix.length > 80) e.push('hero.prefix too long'); if (h.prefix.indexOf('|') >= 0) e.push('hero.prefix must not contain "|"'); }
+      arr(h.words, 'hero.words').forEach(function (w, i) {
+        var p = 'hero.words[' + i + ']';
+        if (isObj(w)) {
+          str(w.text, p + '.text'); if (w.prefix != null) str(w.prefix, p + '.prefix');
+          [['text', w.text], ['prefix', w.prefix]].forEach(function (kv) {
+            if (typeof kv[1] !== 'string') return;
+            if (kv[1].length > 80) e.push(p + '.' + kv[0] + ' too long');
+            if (kv[1].indexOf('|') >= 0) e.push(p + '.' + kv[0] + ' must not contain "|"');
+          });
+        } else {
+          str(w, p);
+          if (typeof w === 'string') { if (w.length > 80) e.push(p + ' too long'); if (w.indexOf('|') >= 0) e.push(p + ' must not contain "|"'); }
+        }
+      });
       arr(h.ctas, 'hero.ctas').forEach(function (c, i) {
         var p = 'hero.ctas[' + i + ']'; if (!isObj(c)) return e.push(p + ' must be an object');
         str(c.label, p + '.label'); url(c.href, p + '.href', true); if (STYLES.indexOf(c.style) < 0) e.push(p + '.style invalid');
@@ -188,10 +218,96 @@
     }
     sect('contact', 'links', function (it, p) { str(it.label, p + '.label'); url(it.href, p + '.href', true); if (STYLES.indexOf(it.style) < 0) e.push(p + '.style invalid'); });
     if (!isObj(d.footer)) e.push('footer missing'); else str(d.footer.text, 'footer.text');
+    if (d.tr != null) { if (!isObj(d.tr)) e.push('tr must be an object'); else checkTr(d, d.tr, 'tr', null, e); }
     return e;
+  }
+
+  /* ---- Turkish (or any) text overlay: d.tr is a PARTIAL copy of the base content, text fields only. ----
+     Non-text keys (urls, images, embeds, source, theme ...) are never taken from the overlay. Arrays overlay by index;
+     projects items may carry `match` (base name or url) so a pinned sync that reorders items cannot misalign them. */
+  var NONTEXT = { href: 1, url: 1, image: 1, embed: 1, source: 1, style: 1, kind: 1, value: 1, decimals: 1, suffix: 1, provider: 1, theme: 1, version: 1, tr: 1, match: 1 };
+  var TR_MAX = 2000;
+  function trItemFor(baseItem, ovArr, i) {
+    ovArr = Array.isArray(ovArr) ? ovArr : [];
+    var b = isObj(baseItem) ? baseItem : {};
+    for (var k = 0; k < ovArr.length; k++) {
+      var m = isObj(ovArr[k]) && typeof ovArr[k].match === 'string' ? ovArr[k].match : '';
+      if (m && (m === b.name || (b.url && m === b.url))) return ovArr[k];
+    }
+    var x = ovArr[i];
+    return isObj(x) && !x.match ? x : undefined;
+  }
+  function wordParts(w) { return typeof w === 'string' ? { t: w, p: '' } : { t: typeof (w && w.text) === 'string' ? w.text : '', p: typeof (w && w.prefix) === 'string' ? w.prefix : '' }; }
+  function mergeWord(b, o) {
+    if (o == null) return b;
+    var bp = wordParts(b), op = wordParts(o);
+    var t = op.t || bp.t, p = op.p || bp.p;
+    return p ? { text: t, prefix: p } : t;
+  }
+  function pairs(base, ov, key) {   // [[baseItem, overlayItem], ...] for one array
+    return base.map(function (b, i) { return [b, key === 'items' && isObj(b) && ('name' in b) ? trItemFor(b, ov, i) : (Array.isArray(ov) ? ov[i] : undefined)]; });
+  }
+  function mergeTr(base, ov, key) {
+    if (NONTEXT[key] || ov == null) return base;
+    if (typeof base === 'string') return typeof ov === 'string' && ov !== '' ? ov : base;
+    if (Array.isArray(base)) {
+      if (!Array.isArray(ov)) return base;
+      return pairs(base, ov, key).map(function (pr) { return key === 'words' ? mergeWord(pr[0], pr[1]) : mergeTr(pr[0], pr[1], key); });
+    }
+    if (isObj(base)) {
+      if (!isObj(ov)) return base;
+      var out = {};
+      Object.keys(base).forEach(function (k) { out[k] = mergeTr(base[k], ov[k], k); });
+      return out;
+    }
+    return base;
+  }
+  // Pure: returns content merged with the overlay for `lang` ('tr'); anything else returns the base without `tr`.
+  function localize(data, lang) {
+    if (!isObj(data)) return data;
+    var out = {};
+    Object.keys(data).forEach(function (k) {
+      if (k === 'tr') return;
+      out[k] = lang === 'tr' && isObj(data.tr) ? mergeTr(data[k], data.tr[k], k) : data[k];
+    });
+    return out;
+  }
+  function checkTr(base, ov, path, key, e) {
+    if (NONTEXT[key] || ov == null) return;
+    if (typeof base === 'string') {
+      if (typeof ov !== 'string') e.push(path + ' must be a string');
+      else if (ov.length > TR_MAX) e.push(path + ' too long');
+      return;
+    }
+    if (Array.isArray(base)) {
+      if (!Array.isArray(ov)) { e.push(path + ' must be an array'); return; }
+      pairs(base, ov, key).forEach(function (pr, i) {
+        var p = path + '[' + i + ']';
+        if (pr[1] == null) return;
+        if (key === 'words') {
+          var o = pr[1];
+          if (typeof o !== 'string' && !isObj(o)) { e.push(p + ' must be a string or {text, prefix}'); return; }
+          [['', typeof o === 'string' ? o : o.text], ['.prefix', isObj(o) ? o.prefix : null]].forEach(function (kv) {
+            if (kv[1] == null) return;
+            if (typeof kv[1] !== 'string') e.push(p + kv[0] + ' must be a string');
+            else { if (kv[1].length > 80) e.push(p + kv[0] + ' too long'); if (kv[1].indexOf('|') >= 0) e.push(p + kv[0] + ' must not contain "|"'); }
+          });
+        } else checkTr(pr[0], pr[1], p, key, e);
+      });
+      return;
+    }
+    if (isObj(base)) {
+      if (!isObj(ov)) { e.push(path + ' must be an object'); return; }
+      if (ov.match != null && typeof ov.match !== 'string') e.push(path + '.match must be a string');
+      Object.keys(ov).forEach(function (k) {
+        if (base[k] === undefined) return;
+        if (k === 'prefix' && typeof ov[k] === 'string' && (ov[k].length > 80 || ov[k].indexOf('|') >= 0)) e.push(path + '.prefix invalid');
+        checkTr(base[k], ov[k], path + '.' + k, k, e);
+      });
+    }
   }
 
   return { HEADER: HEADER, EMBED_PROVIDERS: EMBED_PROVIDERS, parseEmbed: parseEmbed, KINDS: KINDS, SOURCES: SOURCES, STYLES: STYLES, MAX_IMAGE_BYTES: MAX_IMAGE_BYTES, IMAGE_TYPES: IMAGE_TYPES,
     safeUrl: safeUrl, safeImage: safeImage, isSiteImagePath: isSiteImagePath, imageFileName: imageFileName,
-    serialize: serialize, parse: parse, validate: validate };
+    serialize: serialize, parse: parse, validate: validate, localize: localize, trItemFor: trItemFor, wordParts: wordParts, NONTEXT: NONTEXT };
 });
