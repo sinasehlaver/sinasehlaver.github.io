@@ -68,6 +68,10 @@ window.SITE = {
       {
         "text": "problems with whatever tool fits",
         "prefix": "I solve"
+      },
+      {
+        "text": "what's needed",
+        "prefix": "I do"
       }
     ],
     "lead": "Data scientist at MigrosOne (via StartupHeroes), taking ML to production.\nOff the clock I'm a problem solver with whatever tool fits: web apps, handy scripts, sites that teach, 3D-printed parts, small tools that make everyday life easier. Music is the other half: I play, and I mix live sound as a Tonmeister.",
@@ -264,6 +268,17 @@ window.SITE = {
     "heading": "Beyond work",
     "items": [
       {
+        "kind": "text",
+        "title": "Building with Claude Code",
+        "text": "I use Claude Code to build whatever makes my life easier: an app that draws consistent, custom-styled charts and tables for my presentations, a notes and to-do app, a personal widget desktop, a Telegram assistant for my Mac, a ticketing site for university musicals. I run it like a small team: my own board hands backlog items to parallel agents, every project keeps its own rules and memory so nothing is explained twice, and nothing ships until its tests and browser checks pass.",
+        "image": "img/beyond-claude-code.png",
+        "imageAlt": "Illustration of a terminal window with a prompt and code lines, linked to a network of agent nodes",
+        "link": {
+          "label": "",
+          "href": ""
+        }
+      },
+      {
         "kind": "music",
         "title": "Tonmeister & live sound",
         "text": "Since 2014 I've mixed and recorded orchestras, musical shows and bands as a freelancer. Away from the console I tinker with Raspberry Pi, Arduino and 3D printers.",
@@ -276,6 +291,17 @@ window.SITE = {
         "embed": {
           "provider": "instagram",
           "url": ""
+        }
+      },
+      {
+        "kind": "video",
+        "title": "Productions & events",
+        "text": "I make music videos and run productions with crews of musicians, camera and sound people, and I organise events from the first call to the last cable. I'm the get-it-done person: if something's needed, I either do it or know who can. A wide network across music, theatre and tech makes that easy.",
+        "image": "img/beyond-productions.png",
+        "imageAlt": "Illustration of a clapperboard linked to a calendar and a network of people",
+        "link": {
+          "label": "",
+          "href": ""
         }
       },
       {
@@ -381,9 +407,11 @@ window.SITE = {
         "küçük dertleri küçük uygulamalara çevirmek",
         "Excel tablolarını gerçek araçlara dönüştürmek",
         "ML deneylerini production'a taşımak",
-        "prova kaosunu takvime bağlamak"
+        "prova kaosunu takvime bağlamak",
+        "elimdeki araçla sorun çözmek",
+        "ne gerekiyorsa yapmak"
       ],
-      "lead": "MigrosOne'da data scientist olarak ML modellerini production'a taşıyorum (StartupHeroes üzerinden, uzaktan).\nMesai dışında da elimdeki işe hangi araç uyuyorsa onunla çözüm üretirim: web uygulamaları, işe yarayan scriptler, öğreten siteler, 3D baskı parçalar, günlük hayatı kolaylaştıran küçük araçlar. Müzik de işin öbür yarısı: çalarım, bir de Tonmeister olarak canlı ses miksi yaparım.",
+      "lead": "MigrosOne'da data scientist olarak ML modellerini production'a taşıyorum (StartupHeroes üzerinden, uzaktan).\nMesai dışında da elimdeki işe hangi araç uyuyorsa onunla çözüm üretirim: web uygulamaları, işe yarayan scriptler, öğreten siteler, 3D baskı parçalar, günlük hayatı kolaylaştıran küçük araçlar. Bugünlerde çoğunu Claude Code ile yapıyorum. Müzik de işin öbür yarısı: çalarım, bir de Tonmeister olarak canlı ses miksi yaparım.",
       "ctas": [
         {
           "label": "İletişime geç"
@@ -517,12 +545,22 @@ window.SITE = {
       "heading": "İş dışında",
       "items": [
         {
+          "title": "Claude Code ile üretmek",
+          "text": "Hayatımı kolaylaştıran ne varsa Claude Code ile yapıyorum: sunumlarım için tutarlı, özel stilli grafik ve tablolar çizen bir uygulama, not ve yapılacaklar uygulaması, kişisel bir widget masaüstü, Mac'im için Telegram asistanı, üniversite müzikalleri için bir bilet satış sitesi. Küçük bir ekip gibi çalıştırıyorum: kendi panom backlog maddelerini paralel agent'lara dağıtıyor, her projenin kendi kuralları ve hafızası var, böylece hiçbir şey iki kez anlatılmıyor; testler ve tarayıcı kontrolleri geçmeden de hiçbir şey yayına çıkmıyor.",
+          "imageAlt": "Bir komut istemi ve kod satırları olan terminal penceresinin agent düğümlerinden oluşan bir ağa bağlandığı çizim"
+        },
+        {
           "title": "Tonmeister ve canlı ses",
           "text": "2014'ten beri freelance olarak orkestraların, müzikallerin ve grupların canlı ses miksini yapıyor, kayıtlarını alıyorum. Mikserin başında olmadığım zamanlarda Raspberry Pi, Arduino ve 3D yazıcılarla uğraşıyorum.",
           "imageAlt": "Faderlı bir mikser ve dalga biçimi çizimi",
           "link": {
             "label": "Instagram'da takip et ↗"
           }
+        },
+        {
+          "title": "Prodüksiyon ve etkinlikler",
+          "text": "Müzik videoları çekiyor, müzisyenlerden, kamera ve ses ekibinden oluşan ekiplerle prodüksiyon yürütüyorum; etkinlikleri de ilk telefondan son kabloya kadar organize ediyorum. İşi bitiren kişiyim: bir şey gerekiyorsa ya kendim yaparım ya da kimin yapacağını bilirim. Müzik, tiyatro ve teknoloji alanındaki geniş çevrem bunu kolaylaştırıyor.",
+          "imageAlt": "Bir klaketin takvime ve insanlardan oluşan bir ağa bağlandığı çizim"
         },
         {
           "title": "Müzikaller",
