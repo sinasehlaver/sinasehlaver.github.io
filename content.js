@@ -165,7 +165,7 @@ window.SITE = {
         "image": "img/project-claude-pm-board.png",
         "imageAlt": "The claude-pm-board project list: colourful project cards with short descriptors, next steps, open-task counts and Start buttons.",
         "live": {
-          "label": "Try the demo",
+          "label": "Live",
           "href": "https://sinasehlaver.github.io/demos/claude-pm-board/"
         }
       },
