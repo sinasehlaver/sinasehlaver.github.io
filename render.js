@@ -7,10 +7,9 @@
 })(typeof self !== 'undefined' ? self : this, function (Lib) {
   // Static UI strings (not in content.js). English is the key; `tr` is the Turkish table.
   var TR_UI = {
-    'I build': 'İşim gücüm:', 'Repo ↗': 'Kod ↗', 'Live': 'Canlı', 'Details': 'Ayrıntılar',
-    'Open channel': 'Kanalı aç', 'Opens {n} in a new page': '{n} yeni sekmede açılır',
-    'Loads content from {n}': 'İçerik {n} üzerinden yüklenir', 'Loading {n}…': '{n} yükleniyor…',
-    'Play {n} {k}': '{n} {k} oynat', 'reel': 'reel', 'post': 'gönderi', 'video': 'video',
+    'I build': 'İşim gücüm:', 'Repo ↗': 'Kod ↗', 'Live': 'Canlı', 'Play': 'Oynat', 'Watch on Instagram': 'Instagram\'da izle',
+    'Open channel': 'Kanalı aç', 'Open on {n}': '{n} üzerinde aç', 'Opens {n} in a new page': '{n} yeni sekmede açılır',
+    'Play {n}': '{n} oynat', 'Play {n} {k}': '{n} {k} oynat', 'reel': 'reel', 'post': 'gönderi', 'video': 'video',
     'Projects': 'Projeler', 'Beyond': 'İş Dışında', 'Experience': 'Deneyim', 'Tools': 'Araçlar', 'Contact': 'İletişim',
     'Primary': 'Ana gezinme', 'Toggle light/dark theme': 'Açık/koyu temayı değiştir', 'Language': 'Dil'
   };
@@ -115,22 +114,28 @@
       row.appendChild(el(doc, 'time', '', s(it.period)));
       li.appendChild(row);
       if (it.sub) li.appendChild(el(doc, 'p', 'sub', s(it.sub)));
-      var ul = el(doc, 'ul');
-      a(it.bullets).forEach(function (b) { ul.appendChild(inline(doc, el(doc, 'li'), b)); });
       if (a(it.bullets).length) {
-        var det = el(doc, 'details', 'more');
-        det.appendChild(el(doc, 'summary', '', ui(LANG, 'Details')));
-        det.appendChild(ul); li.appendChild(det);
+        var ul = el(doc, 'ul', 'bullets');
+        a(it.bullets).forEach(function (b) { ul.appendChild(inline(doc, el(doc, 'li'), b)); });
+        li.appendChild(ul);
       }
+      entrySkills(doc, li, it.skills);
       ol.appendChild(li);
     });
     sec.appendChild(ol);
     education(doc, d, sec);
   }
+  function entrySkills(doc, li, list) {
+    var items = a(list).map(s).filter(function (x) { return x.trim(); });
+    if (!items.length) return;
+    var row = el(doc, 'div', 'chips entry-skills');
+    items.forEach(function (x) { row.appendChild(el(doc, 'span', '', x)); });
+    li.appendChild(row);
+  }
   function education(doc, d, sec) {
     var e = o(d.education);
     if (e.hidden === true) return;
-    sec.appendChild(el(doc, 'h3', 'edu-h reveal', s(e.heading)));
+    sec.appendChild(el(doc, 'h2', 'edu-h reveal', s(e.heading)));
     var eul = el(doc, 'ul', 'edu-list');
     a(e.items).forEach(function (it) {
       it = o(it);
@@ -138,9 +143,48 @@
       li.appendChild(el(doc, 'h4', '', s(it.title)));
       if (it.sub) li.appendChild(el(doc, 'p', 'sub', s(it.sub)));
       if (it.text) li.appendChild(el(doc, 'p', 'edu-text', s(it.text)));
+      entrySkills(doc, li, it.skills);
       eul.appendChild(li);
     });
     sec.appendChild(eul);
+    thesis(doc, e.thesis, sec);
+  }
+
+  function thesis(doc, th, sec) {
+    th = o(th);
+    if (!s(th.title) && !s(th.text)) return;
+    var card = el(doc, 'article', 'thesis reveal');
+    if (s(th.label)) card.appendChild(el(doc, 'p', 'thesis-label', s(th.label)));
+    card.appendChild(el(doc, 'h3', 'thesis-title', s(th.title)));
+    var body = el(doc, 'div', 'thesis-body');
+    if (s(th.text)) body.appendChild(inline(doc, el(doc, 'p', 'thesis-text'), th.text));
+    var pts = a(th.points).filter(function (x) { return s(x); });
+    if (pts.length) {
+      var ul = el(doc, 'ul', 'thesis-points');
+      pts.forEach(function (x) { ul.appendChild(el(doc, 'li', '', s(x))); });
+      body.appendChild(ul);
+    }
+    card.appendChild(body);
+    var figs = a(th.figures).slice(0, 3).filter(function (f) { f = o(f); var src = Lib.safeImage(f.image); return src && !/\.svg(\?|#|$)/i.test(src); });
+    if (figs.length) {
+      var strip = el(doc, 'div', 'thesis-figs');
+      figs.forEach(function (f) {
+        f = o(f);
+        var fig = el(doc, 'figure', 'thesis-fig');
+        var im = el(doc, 'img', 'thesis-img');
+        im.setAttribute('src', Lib.safeImage(f.image)); im.setAttribute('alt', s(f.alt)); im.setAttribute('loading', 'lazy'); im.setAttribute('decoding', 'async');
+        fig.appendChild(im);
+        if (s(f.caption)) fig.appendChild(el(doc, 'figcaption', '', s(f.caption)));
+        strip.appendChild(fig);
+      });
+      card.appendChild(strip);
+    }
+    var lk = o(th.link);
+    if (lk.href && Lib.safeUrl(lk.href)) {
+      var l = anchor(doc, 'btn small thesis-link', lk.href); l.textContent = (s(lk.label) || 'Read it') + ' ↗';
+      card.appendChild(l);
+    }
+    sec.appendChild(card);
   }
 
   function projects(doc, d, sec) {
@@ -187,54 +231,80 @@
     if (k.languages) sec.appendChild(el(doc, 'p', 'sub reveal', s(k.languages)));
   }
 
-  // Facade only: nothing third-party loads until script.js turns the button into an iframe (when scrolled near the viewport; click is the fallback).
-  function embed(doc, card, e) {
+  // Thumbnail + play button (a real <button>): nothing third-party loads until the visitor clicks it; script.js then swaps in the iframe (DOM APIs, EMBED_OK allowlist).
+  // Thumbnails are self-hosted (CSP img-src 'self'): YouTube defaults to img/thumb-<id>.jpg; script.js hides a missing image and the gradient placeholder shows.
+  function embed(doc, card, act, e, title) {
     e = o(e);
     var p = Lib.parseEmbed(e.provider, e.url);
-    if (!p) return;
-    var name = p.provider === 'youtube' ? 'YouTube' : 'Instagram';
-    if (p.type === 'channel') {
-      var ch = anchor(doc, 'embed-facade embed-' + p.provider + ' embed-channel', p.href);
-      ch.appendChild(el(doc, 'span', 'embed-play', '\u2197'));
-      ch.appendChild(el(doc, 'span', 'embed-label', ui(LANG, 'Open channel')));
-      ch.appendChild(el(doc, 'small', 'embed-note', ui(LANG, 'Opens {n} in a new page', { n: name })));
-      card.appendChild(ch);
+    if (!p) {
+      var lk = Lib.embedLink(e.provider, e.url);
+      if (lk) { var ol = anchor(doc, 'btn small embed-btn embed-link', lk.href); ol.textContent = ui(LANG, 'Open on {n}', { n: lk.provider === 'youtube' ? 'YouTube' : 'Instagram' }) + ' \u2197'; act.appendChild(ol); }
       return;
     }
-    var b = el(doc, 'button', 'embed-facade embed-' + p.provider + ' embed-' + p.type);
+    var name = p.provider === 'youtube' ? 'YouTube' : 'Instagram';
+    if (p.type === 'channel') {
+      var ch = anchor(doc, 'btn small embed-btn embed-channel', p.href);
+      ch.textContent = ui(LANG, 'Open channel') + ' \u2197';
+      act.appendChild(ch);
+      return;
+    }
+    var thumb = Lib.isSiteImagePath(e.thumb) ? e.thumb : (p.provider === 'youtube' && p.id ? 'img/thumb-' + p.id + '.jpg' : '');
+    var fig = el(doc, 'div', 'vframe vframe-' + p.provider + (thumb ? '' : ' no-thumb'));
+    var b = el(doc, 'button', 'vplay embed-btn embed-' + p.provider);
     b.setAttribute('type', 'button');
     b.setAttribute('data-embed-src', p.src);
     b.setAttribute('data-embed-provider', p.provider);
-    b.setAttribute('aria-label', ui(LANG, 'Play {n} {k}', { n: name, k: ui(LANG, p.type === 'reel' ? 'reel' : p.type === 'post' ? 'post' : 'video') }));
-    b.appendChild(el(doc, 'span', 'embed-play', '\u25B6'));
-    b.appendChild(el(doc, 'span', 'embed-label', ui(LANG, 'Loading {n}…', { n: name })));
-    b.appendChild(el(doc, 'small', 'embed-note', ui(LANG, 'Loads content from {n}', { n: p.provider === 'youtube' ? 'youtube-nocookie.com' : 'instagram.com' })));
-    card.appendChild(b);
+    b.setAttribute('aria-label', ui(LANG, 'Play {n}', { n: s(title) || name }));
+    if (thumb) {
+      var im = el(doc, 'img', 'vthumb');
+      im.setAttribute('src', thumb);
+      im.setAttribute('alt', s(e.thumbAlt));
+      im.setAttribute('loading', 'lazy');
+      im.setAttribute('decoding', 'async');
+      b.appendChild(im);
+    }
+    b.appendChild(el(doc, 'span', 'vbadge', name));
+    var pl = el(doc, 'span', 'vicon');
+    pl.setAttribute('aria-hidden', 'true');
+    b.appendChild(pl);
+    fig.appendChild(b);
+    card.appendChild(fig);
   }
 
-  function beyond(doc, d, sec, opts) {
+  function beyond(doc, d, sec) {
     var b = o(d.beyond);
     heading(doc, sec, 2, b);
-    var grid = el(doc, 'div', 'grid');
+    // Fixed rows: wide cards take a full row, the rest pair up 2 per row (CSS stacks them below 760px; never 3 per row).
+    var grid = el(doc, 'div', 'grid beyond-grid');
     a(b.items).forEach(function (it) {
       it = o(it);
       var kind = Lib.KINDS.indexOf(it.kind) >= 0 ? it.kind : 'text';
-      var c = el(doc, 'div', 'card reveal kind-' + kind + (kind === 'text' ? ' wide' : ''));
-      var src = Lib.safeImage(it.image);
-      var ov = opts && opts.imageOverrides;
-      if (ov && typeof it.image === 'string' && Object.prototype.hasOwnProperty.call(ov, it.image) && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/.test(ov[it.image])) src = ov[it.image];
-      if (src && !/\.svg(\?|#|$)/i.test(src)) {
-        var img = el(doc, 'img', 'thumb');
-        img.setAttribute('src', src); img.setAttribute('alt', s(it.imageAlt)); img.setAttribute('loading', 'lazy');
-        img.setAttribute('width', '640'); img.setAttribute('height', '360'); img.setAttribute('decoding', 'async');
-        c.className += ' has-thumb';
-        c.appendChild(img);
-      }
+      var c = el(doc, 'div', 'card reveal kind-' + kind + (kind === 'text' || it.wide === true ? ' wide' : ''));
       c.appendChild(el(doc, 'h3', '', s(it.title)));
       c.appendChild(inline(doc, el(doc, 'p'), it.text));
+      if (Lib.isSiteImagePath(it.image)) {
+        var ph = el(doc, 'img', 'bphoto');
+        ph.setAttribute('src', it.image); ph.setAttribute('alt', s(it.imageAlt)); ph.setAttribute('loading', 'lazy'); ph.setAttribute('decoding', 'async');
+        c.appendChild(ph);
+      }
       var lk = o(it.link);
-      if (lk.label && Lib.safeUrl(lk.href)) { var btn = anchor(doc, 'btn small', lk.href); btn.textContent = s(lk.label); c.appendChild(btn); }
-      embed(doc, c, it.embed);
+      var act = el(doc, 'div', 'cta card-actions');
+      if (lk.label && Lib.safeUrl(lk.href)) { var btn = anchor(doc, 'btn small', lk.href); btn.textContent = s(lk.label); act.appendChild(btn); }
+      embed(doc, c, act, it.embed, it.title);
+      var ems = a(it.embeds).map(o).filter(function (e) { return Lib.parseEmbed(e.provider, e.url) || Lib.embedLink(e.provider, e.url) || (o(e.link).label && Lib.safeUrl(o(e.link).href)); });
+      if (ems.length) {
+        var row = el(doc, 'div', 'media-row media-' + Math.min(ems.length, 2));
+        ems.forEach(function (e) {
+          var col = el(doc, 'div', 'media'), cact = el(doc, 'div', 'cta card-actions');
+          embed(doc, col, cact, e, it.title);
+          var el2 = o(e.link);
+          if (el2.label && Lib.safeUrl(el2.href)) { var cb = anchor(doc, 'btn small', el2.href); cb.textContent = s(el2.label); cact.appendChild(cb); }
+          if (cact.firstChild) col.appendChild(cact);
+          row.appendChild(col);
+        });
+        c.appendChild(row);
+      }
+      if (act.firstChild) c.appendChild(act);
       grid.appendChild(c);
     });
     sec.appendChild(grid);
@@ -255,6 +325,7 @@
   }
 
   // Render everything into `doc`. opts.imageOverrides: {"img/x.png": "data:image/png;base64,..."} (editor preview only).
+  var FONT_SLUGS = (Lib.FONTS || []).map(function (f) { return f.slug; });
   var PRESETS = ['orange', 'teal', 'violet', 'green', 'rose', 'blue'];
   function lum(hex) {
     var c = [1, 3, 5].map(function (i) { var v = parseInt(hex.substr(i, 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
@@ -277,6 +348,26 @@
     } else {
       props.forEach(function (k) { root.style.removeProperty(k); });
       if (p) root.dataset.accent = p; else delete root.dataset.accent;
+    }
+    // fonts: theme.fontDisplay/fontText slug -> --font-display/--font-text ("F-<slug>" families are declared in fonts/fonts.css); unset = built-in stack from style.css.
+    var known = function (v) { return typeof v === 'string' && FONT_SLUGS.indexOf(v) >= 0 ? v : ''; };
+    [['--font-display', known(t.fontDisplay), '"Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif'], ['--font-text', known(t.fontText), 'Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif']].forEach(function (f) {
+      var attr = f[0] === '--font-display' ? 'fd' : 'ft';
+      if (f[1]) { root.style.setProperty(f[0], '"F-' + f[1] + '",' + f[2]); root.dataset[attr] = f[1]; } else { root.style.removeProperty(f[0]); delete root.dataset[attr]; }
+    });
+    // mat: data-mat=tinted|green (absent = off) + --mat-op line strength; mat.js draws the SVG into div.mat.
+    var mt = o(t.mat), mode = mt.mode === 'tinted' || mt.mode === 'green' ? mt.mode : '';
+    var lines = typeof mt.lines === 'number' && mt.lines >= 10 && mt.lines <= 100 ? Math.round(mt.lines) : 60;
+    var blur = typeof mt.blur === 'number' && mt.blur >= 0 && mt.blur <= 12 ? mt.blur : 2;
+    var aura = mt.aura === 'behind' || mt.aura === 'over' ? mt.aura : '';
+    if (mode) {
+      root.dataset.mat = mode; root.style.setProperty('--mat-op', String(lines / 100)); root.style.setProperty('--mat-blur', blur + 'px');
+      if (aura) root.dataset.matAura = aura; else delete root.dataset.matAura;
+    } else { delete root.dataset.mat; delete root.dataset.matAura; root.style.removeProperty('--mat-op'); root.style.removeProperty('--mat-blur'); }
+    if (doc.body && doc.querySelector) {
+      var mel = doc.querySelector('.mat');
+      if (mode && !mel) { mel = doc.createElement('div'); mel.className = 'mat'; mel.setAttribute('aria-hidden', 'true'); doc.body.insertBefore(mel, doc.body.firstChild); }
+      else if (!mode && mel && mel.parentNode) mel.parentNode.removeChild(mel);
     }
   }
 
@@ -352,6 +443,9 @@
       doc.addEventListener('click', function (e) {   // keep the preview on this page; only in-page anchors work
         var l = e.target && e.target.closest && e.target.closest('a');
         if (l && (l.getAttribute('href') || '').charAt(0) !== '#') e.preventDefault();
+      });
+      doc.addEventListener('keydown', function (e) {   // Esc inside the frame leaves the editor's full-page preview
+        if (e.key === 'Escape' && win.parent) win.parent.postMessage({ type: 'site:esc' }, '*');
       });
       win.addEventListener('message', function (ev) {
         var m = ev.data;

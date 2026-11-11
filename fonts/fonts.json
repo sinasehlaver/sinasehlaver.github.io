@@ -1,0 +1,154 @@
+[
+ {
+  "slug": "gloock",
+  "family": "Gloock",
+  "role": "display",
+  "file": "gloock/Gloock-Regular.woff2",
+  "license": "SIL OFL 1.1 (gloock/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/gloock"
+ },
+ {
+  "slug": "young-serif",
+  "family": "Young Serif",
+  "role": "display",
+  "file": "young-serif/YoungSerif-Regular.woff2",
+  "license": "SIL OFL 1.1 (young-serif/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/youngserif"
+ },
+ {
+  "slug": "caprasimo",
+  "family": "Caprasimo",
+  "role": "display",
+  "file": "caprasimo/Caprasimo-Regular.woff2",
+  "license": "SIL OFL 1.1 (caprasimo/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/caprasimo"
+ },
+ {
+  "slug": "yeseva-one",
+  "family": "Yeseva One",
+  "role": "display",
+  "file": "yeseva-one/YesevaOne-Regular.woff2",
+  "license": "SIL OFL 1.1 (yeseva-one/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/yesevaone"
+ },
+ {
+  "slug": "familjen-grotesk",
+  "family": "Familjen Grotesk",
+  "role": "text",
+  "file": "familjen-grotesk/FamiljenGrotesk[wght].woff2",
+  "license": "SIL OFL 1.1 (familjen-grotesk/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/familjengrotesk"
+ },
+ {
+  "slug": "schibsted-grotesk",
+  "family": "Schibsted Grotesk",
+  "role": "text",
+  "file": "schibsted-grotesk/SchibstedGrotesk[wght].woff2",
+  "license": "SIL OFL 1.1 (schibsted-grotesk/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/schibstedgrotesk"
+ },
+ {
+  "slug": "big-shoulders-display",
+  "family": "Big Shoulders Display",
+  "role": "display",
+  "file": "big-shoulders-display/BigShouldersDisplay[wght].woff2",
+  "license": "SIL OFL 1.1 (big-shoulders-display/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/bigshouldersdisplay"
+ },
+ {
+  "slug": "unbounded",
+  "family": "Unbounded",
+  "role": "display",
+  "file": "unbounded/Unbounded[wght].woff2",
+  "license": "SIL OFL 1.1 (unbounded/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/unbounded"
+ },
+ {
+  "slug": "martian-mono",
+  "family": "Martian Mono",
+  "role": "mono",
+  "file": "martian-mono/MartianMono[wdth,wght].woff2",
+  "license": "SIL OFL 1.1 (martian-mono/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/martianmono"
+ },
+ {
+  "slug": "sometype-mono",
+  "family": "Sometype Mono",
+  "role": "mono",
+  "file": "sometype-mono/SometypeMono[wght].woff2",
+  "license": "SIL OFL 1.1 (sometype-mono/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/sometypemono"
+ },
+ {
+  "slug": "xanh-mono",
+  "family": "Xanh Mono",
+  "role": "mono",
+  "file": "xanh-mono/XanhMono-Regular.woff2",
+  "license": "SIL OFL 1.1 (xanh-mono/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/xanhmono"
+ },
+ {
+  "slug": "fragment-mono",
+  "family": "Fragment Mono",
+  "role": "mono",
+  "file": "fragment-mono/FragmentMono-Regular.woff2",
+  "license": "SIL OFL 1.1 (fragment-mono/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/fragmentmono"
+ },
+ {
+  "slug": "bevan",
+  "family": "Bevan",
+  "role": "display",
+  "file": "bevan/Bevan-Regular.woff2",
+  "license": "SIL OFL 1.1 (bevan/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/bevan"
+ },
+ {
+  "slug": "rokkitt",
+  "family": "Rokkitt",
+  "role": "display",
+  "file": "rokkitt/Rokkitt[wght].woff2",
+  "license": "SIL OFL 1.1 (rokkitt/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/rokkitt"
+ },
+ {
+  "slug": "besley",
+  "family": "Besley",
+  "role": "text",
+  "file": "besley/Besley[wght].woff2",
+  "license": "SIL OFL 1.1 (besley/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/besley"
+ },
+ {
+  "slug": "literata",
+  "family": "Literata",
+  "role": "text",
+  "file": "literata/Literata[opsz,wght].woff2",
+  "license": "SIL OFL 1.1 (literata/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/literata"
+ },
+ {
+  "slug": "gelasio",
+  "family": "Gelasio",
+  "role": "text",
+  "file": "gelasio/Gelasio[wght].woff2",
+  "license": "SIL OFL 1.1 (gelasio/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/gelasio"
+ },
+ {
+  "slug": "shantell-sans",
+  "family": "Shantell Sans",
+  "role": "display",
+  "file": "shantell-sans/ShantellSans[BNCE,INFM,SPAC,wght].woff2",
+  "license": "SIL OFL 1.1 (shantell-sans/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/shantellsans"
+ },
+ {
+  "slug": "syne-mono",
+  "family": "Syne Mono",
+  "role": "mono",
+  "file": "syne-mono/SyneMono-Regular.woff2",
+  "license": "SIL OFL 1.1 (syne-mono/OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/synemono"
+ }
+]

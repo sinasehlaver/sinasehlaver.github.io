@@ -20,23 +20,29 @@
     ' *                 replaces hero.prefix for that word; max 80 chars, no "|"), lead,',
     ' *                 ctas:[{label, href, style:"primary"|"default"}],',
     ' *                 stats:[{value:number, suffix, decimals:int, label}]}',
-    ' *  theme         (optional) {preset:"orange"|"teal"|"violet"|"green"|"rose"|"blue", accent:"" | "#rrggbb" (custom accent, overrides preset)}',
+    ' *  theme         (optional) {preset:"orange"|"teal"|"violet"|"green"|"rose"|"blue", accent:"" | "#rrggbb" (custom accent, overrides preset),',
+    ' *                 fontDisplay, fontText: "" | font slug from site/fonts/fonts.json ("" = built-in Space Grotesk/Inter),',
+    ' *                 mat: {mode:"off"|"tinted"|"green", lines:10..100 (integer, line strength %), blur:0..12 (px, default 2), aura:"off"|"behind"|"over" (aurora glow with the mat; default off)} (cutting-mat background; absent = off)}',
     ' *  langSwitch    (optional) boolean; true = show the TR/EN switch on the site. Absent/false = switch hidden and the site always renders English (set from the editor, Colours & site).',
-    ' *  experience    {heading, items:[{role, org, period, sub, bullets:[string]}]}',
-    ' *  education     {heading, items:[{title, sub, text}]}',
+    ' *  experience    {heading, items:[{role, org, period, sub, bullets:[string], skills?:[string] (<=20 items, <=40 chars each, chips under the entry)}]}',
+    ' *  education     {heading, items:[{title, sub, text, skills?:[string]}], thesis?:{label, title, text, points:[string], link:{label,href}, figures:[{image,alt,caption}] (max 3)}}',
     ' *  projects      {heading, items:[{name, url, description, source:"manual"|"pinned", live?:{label, href}, image?, imageAlt?}]}',
     ' *                source "pinned" = written by the GitHub pinned-repos sync. A sync may replace',
     ' *                only "pinned" items and must leave "manual" ones alone.',
     ' *  skills        {heading, groups:[{label, items:[string]}], languages}',
-    ' *  beyond        {heading, items:[{kind, title, text, image, imageAlt, link:{label, href}}]}',
+    ' *  beyond        {heading, items:[{kind, title, text, link:{label, href}, embed?, embeds?, image?, imageAlt?, wide?}]}',
+    ' *                wide: true = full row (text cards are always full); others pair up 2 per row (1 below 760px). image = a self-hosted',
+    ' *                photo (img/<name>.png|jpg|webp, not svg; empty = none). embeds = up to 4 players side by side, each {provider, url, thumb?,',
+    ' *                thumbAlt?, link?:{label, href}} (link = a button under that player, e.g. its channel).',
     ' *                kind: "text"|"music"|"video"|"band"|"photo"|"link"',
-    ' *                image: relative path img/<file> (png|jpg|webp, no svg) or "" for none',
     ' *                link: {label:"", href:""} means no link',
-    ' *                embed (optional): {provider:"youtube"|"instagram", url}; url "" or absent = none. Strict allowlist:',
-    ' *                  youtube https://www.youtube.com/watch?v=ID | https://youtu.be/ID | https://www.youtube.com/embed/ID',
-    ' *                  (facade, auto-loaded when scrolled into view -> youtube-nocookie.com) or channel https://www.youtube.com/@handle (cannot be',
-    ' *                  iframed: renders an "Open channel" card); instagram https://www.instagram.com/(p|reel)/SHORTCODE/.',
-    ' *                  Nothing third-party loads until the embed scrolls into view. YouTube refuses playback from file:// (error 153): works when hosted.',
+    ' *                embed (optional): {provider:"youtube"|"instagram"|"" (auto from url), url}; url "" or absent = none. Allowlist:',
+    ' *                  youtube (www./m./no-www, extra ?t=/&si= ok) watch?v=ID | youtu.be/ID | shorts|live|embed/ID',
+    ' *                  (a thumbnail + play button; a click swaps it for the player -> youtube-nocookie.com) or channel https://www.youtube.com/@handle (cannot be',
+    ' *                  iframed: renders an "Open channel" link); instagram https://www.instagram.com/(p|reel)/SHORTCODE/.',
+    ' *                  embed.thumb (optional, img/<name>.png|jpg|webp, not svg) + embed.thumbAlt: self-hosted thumbnail. YouTube defaults to img/thumb-<id>.jpg',
+    ' *                  (scripts/fetch-thumbs.mjs downloads it); Instagram with no thumb shows a gradient placeholder.',
+    ' *                  Nothing third-party loads until the visitor clicks the thumbnail. YouTube refuses playback from file:// (error 153): works when hosted.',
     ' *  contact       {heading, intro, links:[{label, href, style:"primary"|"default"}]}',
     ' *  Sections experience/education/projects/skills/beyond/contact each take an optional boolean `hidden` (absent = visible; true = not rendered, nav link hidden; set from the editor).',
     ' *  footer        {text}',
@@ -48,23 +54,55 @@
   ].join('\n');
 
   var EMBED_PROVIDERS = ['youtube', 'instagram'];
-  // Strict allowlist. Returns {provider, type:'video'|'channel'|'post'|'reel', id, src, href} or null.
-  // `src` is rebuilt only from the matched id/shortcode, never from the input string.
-  function parseEmbed(provider, url) {
+  var YT_HOSTS = { 'youtube.com': 1, 'www.youtube.com': 1, 'm.youtube.com': 1, 'music.youtube.com': 1, 'youtu.be': 1, 'www.youtube-nocookie.com': 1, 'youtube-nocookie.com': 1 };
+  var IG_HOSTS = { 'instagram.com': 1, 'www.instagram.com': 1, 'm.instagram.com': 1 };
+  // https only; host = letters/digits/dots/dashes (so `youtube.com@evil.com` fails); no whitespace, quotes or angle brackets anywhere.
+  function splitUrl(url) {
     if (typeof url !== 'string') return null;
-    var u = url.trim(), m;
+    var m = /^https:\/\/([A-Za-z0-9.-]+)(\/[^\s"'<>\\?#]*)?(\?[^\s"'<>\\#]*)?(#[^\s"'<>\\]*)?$/.exec(url.trim());
+    return m ? { host: m[1].toLowerCase(), path: m[2] || '/', query: m[3] || '' } : null;
+  }
+  // Provider "" / null = auto: detected from the URL's host.
+  function embedProvider(provider, url) {
+    if (provider) return EMBED_PROVIDERS.indexOf(provider) >= 0 ? provider : null;
+    var u = splitUrl(url); if (!u) return null;
+    return YT_HOSTS[u.host] ? 'youtube' : IG_HOSTS[u.host] ? 'instagram' : null;
+  }
+  // Allowlist. Returns {provider, type:'video'|'channel'|'post'|'reel', id, src, href} or null.
+  // `src` and `href` are rebuilt only from the matched id/shortcode, never from the input string.
+  function parseEmbed(provider, url) {
+    provider = embedProvider(provider, url);
+    var u = splitUrl(url), m, id = '';
+    if (!provider || !u) return null;
     if (provider === 'youtube') {
-      if ((m = /^https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})$/.exec(u)) || (m = /^https:\/\/youtu\.be\/([A-Za-z0-9_-]{11})$/.exec(u)) || (m = /^https:\/\/www\.youtube\.com\/embed\/([A-Za-z0-9_-]{11})$/.exec(u)))
-        return { provider: provider, type: 'video', id: m[1], src: 'https://www.youtube-nocookie.com/embed/' + m[1], href: 'https://www.youtube.com/watch?v=' + m[1] };
-      if ((m = /^https:\/\/www\.youtube\.com\/@([A-Za-z0-9._-]{3,30})\/?$/.exec(u)))
+      if (!YT_HOSTS[u.host]) return null;
+      var vid = /^[A-Za-z0-9_-]{11}$/;
+      if (u.host === 'youtu.be') { if ((m = /^\/([A-Za-z0-9_-]{11})\/?$/.exec(u.path))) id = m[1]; }
+      else if (/^\/watch\/?$/.test(u.path)) { if ((m = /[?&]v=([A-Za-z0-9_-]{11})(?:&|$)/.exec(u.query))) id = m[1]; }
+      else if ((m = /^\/(?:shorts|live|embed|v)\/([A-Za-z0-9_-]{11})\/?$/.exec(u.path))) id = m[1];
+      if (id && vid.test(id)) return { provider: provider, type: 'video', id: id, src: 'https://www.youtube-nocookie.com/embed/' + id, href: 'https://www.youtube.com/watch?v=' + id };
+      if (u.host === 'youtu.be' || /nocookie/.test(u.host)) return null;
+      if ((m = /^\/@([A-Za-z0-9._-]{3,30})(?:\/(?:featured|videos|shorts|streams|playlists|community|about|releases))?\/?$/.exec(u.path)))
         return { provider: provider, type: 'channel', id: m[1], src: '', href: 'https://www.youtube.com/@' + m[1] };
+      if ((m = /^\/(channel\/UC[A-Za-z0-9_-]{22}|c\/[A-Za-z0-9._-]{1,100}|user\/[A-Za-z0-9._-]{1,100})(?:\/[a-z]+)?\/?$/.exec(u.path)))
+        return { provider: provider, type: 'channel', id: m[1], src: '', href: 'https://www.youtube.com/' + m[1] };
       return null;
     }
     if (provider === 'instagram') {
-      if ((m = /^https:\/\/www\.instagram\.com\/(p|reel)\/([A-Za-z0-9_-]{5,30})\/?$/.exec(u)))
-        return { provider: provider, type: m[1] === 'p' ? 'post' : 'reel', id: m[2], src: 'https://www.instagram.com/' + m[1] + '/' + m[2] + '/embed/', href: 'https://www.instagram.com/' + m[1] + '/' + m[2] + '/' };
+      if (!IG_HOSTS[u.host]) return null;
+      if ((m = /^\/(?:[A-Za-z0-9._]{1,30}\/)?(p|reels?|tv)\/([A-Za-z0-9_-]{5,40})\/?$/.exec(u.path))) {
+        var t = m[1] === 'tv' ? 'p' : m[1] === 'reels' ? 'reel' : m[1];
+        return { provider: provider, type: t === 'p' ? 'post' : 'reel', id: m[2], src: 'https://www.instagram.com/' + t + '/' + m[2] + '/embed/', href: 'https://www.instagram.com/' + t + '/' + m[2] + '/' };
+      }
     }
     return null;
+  }
+  // Any other https link on the provider's own host (a playlist, a profile): no player, shown as a plain "Open on …" link.
+  function embedLink(provider, url) {
+    provider = embedProvider(provider, url);
+    var u = splitUrl(url);
+    if (!provider || !u || !(provider === 'youtube' ? YT_HOSTS : IG_HOSTS)[u.host] || /nocookie/.test(u.host)) return null;
+    return { provider: provider, href: url.trim() };
   }
 
   var KINDS = ['text', 'music', 'video', 'band', 'photo', 'link'];
@@ -107,7 +145,11 @@
   }
 
   function serialize(data, header) {
-    return (header || HEADER) + '\nwindow.SITE = ' + JSON.stringify(data, null, 2) + ';\n';
+    return (header || HEADER) + '\nwindow.SITE = ' + JSON.stringify(data, function (k, v) {
+      // An embed with nothing filled in = no embed: keep it out of content.js.
+      if (k === 'embed' && v && typeof v === 'object' && !Array.isArray(v) && !v.provider && !String(v.url || '').trim() && !v.thumb && !v.thumbAlt) return undefined;
+      return v;
+    }, 2) + ';\n';
   }
 
   // Extracts {data, prefix} from content.js text.
@@ -118,6 +160,31 @@
     return { data: JSON.parse(body), prefix: text.slice(0, m.index).replace(/\s+$/, '') };
   }
 
+  // Single source of the font allowlist [slug, family, role]; a test checks it equals fonts/fonts.json (which fonts.css mirrors).
+  var FONTS = [
+    ['gloock', 'Gloock', 'display'],
+    ['young-serif', 'Young Serif', 'display'],
+    ['caprasimo', 'Caprasimo', 'display'],
+    ['yeseva-one', 'Yeseva One', 'display'],
+    ['familjen-grotesk', 'Familjen Grotesk', 'text'],
+    ['schibsted-grotesk', 'Schibsted Grotesk', 'text'],
+    ['big-shoulders-display', 'Big Shoulders Display', 'display'],
+    ['unbounded', 'Unbounded', 'display'],
+    ['martian-mono', 'Martian Mono', 'mono'],
+    ['sometype-mono', 'Sometype Mono', 'mono'],
+    ['xanh-mono', 'Xanh Mono', 'mono'],
+    ['fragment-mono', 'Fragment Mono', 'mono'],
+    ['bevan', 'Bevan', 'display'],
+    ['rokkitt', 'Rokkitt', 'display'],
+    ['besley', 'Besley', 'text'],
+    ['literata', 'Literata', 'text'],
+    ['gelasio', 'Gelasio', 'text'],
+    ['shantell-sans', 'Shantell Sans', 'display'],
+    ['syne-mono', 'Syne Mono', 'mono']
+  ].map(function (f) { return { slug: f[0], family: f[1], role: f[2] }; });
+  var FONT_SLUGS = FONTS.map(function (f) { return f.slug; });
+  var MAT_MODES = ['off', 'tinted', 'green'];
+  var MAT_AURA = ['off', 'behind', 'over'];
   var THEME_PRESETS = ['orange', 'teal', 'violet', 'green', 'rose', 'blue'];
   function isObj(x) { return x && typeof x === 'object' && !Array.isArray(x); }
 
@@ -138,6 +205,20 @@
       else {
         if (d.theme.preset != null && THEME_PRESETS.indexOf(d.theme.preset) < 0) e.push('theme.preset must be one of ' + THEME_PRESETS.join(', '));
         if (d.theme.accent != null && d.theme.accent !== '' && !(typeof d.theme.accent === 'string' && /^#[0-9a-fA-F]{6}$/.test(d.theme.accent))) e.push('theme.accent must be empty or #rrggbb');
+        ['fontDisplay', 'fontText'].forEach(function (k) {
+          var v = d.theme[k];
+          if (v != null && v !== '' && !(typeof v === 'string' && FONT_SLUGS.indexOf(v) >= 0)) e.push('theme.' + k + ' must be empty or one of ' + FONT_SLUGS.join(', '));
+        });
+        if (d.theme.mat != null) {
+          var mt = d.theme.mat;
+          if (!isObj(mt)) e.push('theme.mat must be an object');
+          else {
+            if (mt.mode != null && MAT_MODES.indexOf(mt.mode) < 0) e.push('theme.mat.mode must be one of ' + MAT_MODES.join(', '));
+            if (mt.lines != null && !(typeof mt.lines === 'number' && Number.isInteger(mt.lines) && mt.lines >= 10 && mt.lines <= 100)) e.push('theme.mat.lines must be an integer 10..100');
+            if (mt.blur != null && !(typeof mt.blur === 'number' && mt.blur >= 0 && mt.blur <= 12)) e.push('theme.mat.blur must be a number 0..12 (px)');
+            if (mt.aura != null && MAT_AURA.indexOf(mt.aura) < 0) e.push('theme.mat.aura must be one of ' + MAT_AURA.join(', '));
+          }
+        }
       }
     }
     if (d.langSwitch != null && typeof d.langSwitch !== 'boolean') e.push('langSwitch must be a boolean');
@@ -184,11 +265,39 @@
         item(it, p);
       });
     }
+    function skillList(it, p) {
+      if (it.skills == null) return;
+      arr(it.skills, p + '.skills');
+      if (!Array.isArray(it.skills)) return;
+      if (it.skills.length > 20) e.push(p + '.skills has more than 20 items');
+      it.skills.forEach(function (x, j) { str(x, p + '.skills[' + j + ']'); if (typeof x === 'string' && x.length > 40) e.push(p + '.skills[' + j + '] longer than 40 chars'); });
+    }
     sect('experience', 'items', function (it, p) {
+      skillList(it, p);
       str(it.role, p + '.role'); str(it.org, p + '.org'); str(it.period, p + '.period'); str(it.sub, p + '.sub');
       arr(it.bullets, p + '.bullets').forEach(function (b, j) { str(b, p + '.bullets[' + j + ']'); });
     });
-    sect('education', 'items', function (it, p) { str(it.title, p + '.title'); str(it.sub, p + '.sub'); str(it.text, p + '.text'); });
+    sect('education', 'items', function (it, p) { skillList(it, p); str(it.title, p + '.title'); str(it.sub, p + '.sub'); str(it.text, p + '.text'); });
+    if (isObj(d.education) && d.education.thesis != null) {
+      var th = d.education.thesis;
+      if (!isObj(th)) e.push('education.thesis must be an object');
+      else {
+        ['label', 'title', 'text'].forEach(function (k) { if (th[k] != null) str(th[k], 'education.thesis.' + k); });
+        if (th.points != null) arr(th.points, 'education.thesis.points').forEach(function (x, j) { str(x, 'education.thesis.points[' + j + ']'); });
+        if (th.link != null) { if (!isObj(th.link)) e.push('education.thesis.link must be an object'); else { if (th.link.label != null) str(th.link.label, 'education.thesis.link.label'); url(th.link.href, 'education.thesis.link.href', false); } }
+        if (th.figures != null) {
+          var fg = arr(th.figures, 'education.thesis.figures');
+          if (fg.length > 3) e.push('education.thesis.figures has more than 3 items');
+          fg.forEach(function (f, j) {
+            var fp = 'education.thesis.figures[' + j + ']';
+            if (!isObj(f)) return e.push(fp + ' must be an object');
+            if (f.image !== '' && f.image != null && !(isSiteImagePath(f.image) || safeImage(f.image))) e.push(fp + '.image invalid');
+            if (f.image && /\.svg(\?|#|$)/i.test(f.image)) e.push(fp + '.image must not be svg');
+            if (f.alt != null) str(f.alt, fp + '.alt'); if (f.caption != null) str(f.caption, fp + '.caption');
+          });
+        }
+      }
+    }
     sect('projects', 'items', function (it, p) {
       str(it.name, p + '.name'); str(it.description, p + '.description'); url(it.url, p + '.url', false);
       if (SOURCES.indexOf(it.source) < 0) e.push(p + '.source must be manual|pinned');
@@ -207,14 +316,24 @@
     sect('beyond', 'items', function (it, p) {
       if (KINDS.indexOf(it.kind) < 0) e.push(p + '.kind must be one of ' + KINDS.join('|'));
       str(it.title, p + '.title'); str(it.text, p + '.text');
-      if (it.image !== '' && it.image != null && !(isSiteImagePath(it.image) || safeImage(it.image))) e.push(p + '.image invalid');
-      if (it.image && /\.svg(\?|#|$)/i.test(it.image)) e.push(p + '.image must not be svg');
+      if (it.image !== '' && it.image != null && !isSiteImagePath(it.image)) e.push(p + '.image must be img/<name>.png|jpg|webp (self-hosted, not svg)');
       if (it.link != null) { if (!isObj(it.link)) e.push(p + '.link must be an object'); else { str(it.link.label, p + '.link.label'); url(it.link.href, p + '.link.href', false); } }
-      if (it.embed != null) {
-        if (!isObj(it.embed)) e.push(p + '.embed must be an object');
-        else if (EMBED_PROVIDERS.indexOf(it.embed.provider) < 0) e.push(p + '.embed.provider must be youtube|instagram');
-        else if (typeof it.embed.url !== 'string') e.push(p + '.embed.url must be a string');
-        else if (it.embed.url.trim() && !parseEmbed(it.embed.provider, it.embed.url)) e.push(p + '.embed.url is not an allowed ' + it.embed.provider + ' URL');
+      if (it.imageAlt != null) str(it.imageAlt, p + '.imageAlt');
+      if (it.wide != null && typeof it.wide !== 'boolean') e.push(p + '.wide must be a boolean');
+      function emb(x, q) {
+        if (!isObj(x)) { e.push(q + ' must be an object'); return; }
+        var u = x.url == null ? '' : x.url;
+        if (typeof u !== 'string') { e.push(q + '.url must be a string'); return; }
+        if (x.provider != null && x.provider !== '' && EMBED_PROVIDERS.indexOf(x.provider) < 0) e.push(q + '.provider must be youtube, instagram or empty (auto)');
+        else if (u.trim() && !parseEmbed(x.provider, u) && !embedLink(x.provider, u)) e.push(q + '.url is not a ' + (x.provider || 'YouTube/Instagram') + ' link: paste a video/post/channel URL, or leave it empty');
+        if (x.thumb !== '' && x.thumb != null && !isSiteImagePath(x.thumb)) e.push(q + '.thumb must be img/<name>.png|jpg|webp');
+        if (x.thumbAlt != null) str(x.thumbAlt, q + '.thumbAlt');
+        if (x.link != null) { if (!isObj(x.link)) e.push(q + '.link must be an object'); else { str(x.link.label, q + '.link.label'); url(x.link.href, q + '.link.href', false); } }
+      }
+      if (it.embed != null) emb(it.embed, p + '.embed');
+      if (it.embeds != null) {
+        if (!Array.isArray(it.embeds)) e.push(p + '.embeds must be an array');
+        else { if (it.embeds.length > 4) e.push(p + '.embeds: at most 4'); it.embeds.forEach(function (x, j) { emb(x, p + '.embeds[' + j + ']'); }); }
       }
     });
     if (isObj(d.contact)) {
@@ -229,7 +348,7 @@
   /* ---- Turkish (or any) text overlay: d.tr is a PARTIAL copy of the base content, text fields only. ----
      Non-text keys (urls, images, embeds, source, theme ...) are never taken from the overlay. Arrays overlay by index;
      projects items may carry `match` (base name or url) so a pinned sync that reorders items cannot misalign them. */
-  var NONTEXT = { hidden: 1, langSwitch: 1, href: 1, url: 1, image: 1, embed: 1, source: 1, style: 1, kind: 1, value: 1, decimals: 1, suffix: 1, provider: 1, theme: 1, version: 1, tr: 1, match: 1 };
+  var NONTEXT = { hidden: 1, wide: 1, skills: 1, langSwitch: 1, href: 1, url: 1, image: 1, thumb: 1, embed: 1, source: 1, style: 1, kind: 1, value: 1, decimals: 1, suffix: 1, provider: 1, theme: 1, version: 1, tr: 1, match: 1 };
   var TR_MAX = 2000;
   function trItemFor(baseItem, ovArr, i) {
     ovArr = Array.isArray(ovArr) ? ovArr : [];
@@ -311,7 +430,7 @@
     }
   }
 
-  return { HEADER: HEADER, EMBED_PROVIDERS: EMBED_PROVIDERS, parseEmbed: parseEmbed, KINDS: KINDS, SOURCES: SOURCES, STYLES: STYLES, MAX_IMAGE_BYTES: MAX_IMAGE_BYTES, IMAGE_TYPES: IMAGE_TYPES,
+  return { HEADER: HEADER, FONTS: FONTS, MAT_MODES: MAT_MODES, EMBED_PROVIDERS: EMBED_PROVIDERS, parseEmbed: parseEmbed, embedLink: embedLink, embedProvider: embedProvider, KINDS: KINDS, SOURCES: SOURCES, STYLES: STYLES, MAX_IMAGE_BYTES: MAX_IMAGE_BYTES, IMAGE_TYPES: IMAGE_TYPES,
     safeUrl: safeUrl, safeImage: safeImage, isSiteImagePath: isSiteImagePath, imageFileName: imageFileName,
     serialize: serialize, parse: parse, validate: validate, localize: localize, trItemFor: trItemFor, wordParts: wordParts, NONTEXT: NONTEXT };
 });

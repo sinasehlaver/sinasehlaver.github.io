@@ -13,23 +13,28 @@
  *                 replaces hero.prefix for that word; max 80 chars, no "|"), lead,
  *                 ctas:[{label, href, style:"primary"|"default"}],
  *                 stats:[{value:number, suffix, decimals:int, label}]}
- *  theme         (optional) {preset:"orange"|"teal"|"violet"|"green"|"rose"|"blue", accent:"" | "#rrggbb" (custom accent, overrides preset)}
+ *  theme         (optional) {preset:"orange"|"teal"|"violet"|"green"|"rose"|"blue", accent:"" | "#rrggbb" (custom accent, overrides preset),
+ *                 fontDisplay, fontText: "" | font slug from site/fonts/fonts.json ("" = built-in Space Grotesk/Inter),
+ *                 mat: {mode:"off"|"tinted"|"green", lines:10..100 (integer, line strength %), blur:0..12 (px, default 2), aura:"off"|"behind"|"over" (aurora glow with the mat; default off)} (cutting-mat background; absent = off)}
  *  langSwitch    (optional) boolean; true = show the TR/EN switch on the site. Absent/false = switch hidden and the site always renders English (set from the editor, Colours & site).
- *  experience    {heading, items:[{role, org, period, sub, bullets:[string]}]}
- *  education     {heading, items:[{title, sub, text}]}
+ *  experience    {heading, items:[{role, org, period, sub, bullets:[string], skills?:[string]}]}
+ *  education     {heading, items:[{title, sub, text, skills?:[string]}], thesis?:{label, title, text, points:[string], link:{label,href}, figures:[{image,alt,caption}] (max 3)}}   (thesis = separate paper-style card under the degrees; shown only when title or text is set)
  *  projects      {heading, items:[{name, url, description, source:"manual"|"pinned", live?:{label, href}, image?, imageAlt?}]}
  *                source "pinned" = written by the GitHub pinned-repos sync. A sync may replace
  *                only "pinned" items and must leave "manual" ones alone.
  *  skills        {heading, groups:[{label, items:[string]}], languages}
- *  beyond        {heading, items:[{kind, title, text, image, imageAlt, link:{label, href}}]}
+ *  beyond        {heading, items:[{kind, title, text, link:{label, href}, embed?, embeds?, image?, imageAlt?, wide?}]}
+ *                wide: true = full row (text cards always are); the rest pair up 2 per row on desktop (1 below 760px), so order them in pairs.
+ *                image = a self-hosted photo under the text (img/<name>.png|jpg|webp, not svg; "" = none).
+ *                embeds (optional, max 4): players side by side, each {provider, url, thumb?, thumbAlt?, link?:{label, href}} (link = a button under that player).
  *                kind: "text"|"music"|"video"|"band"|"photo"|"link"
- *                image: relative path img/<file> (png|jpg|webp, no svg) or "" for none
  *                link: {label:"", href:""} means no link
- *                embed (optional): {provider:"youtube"|"instagram", url}; url "" or absent = none. Strict allowlist:
- *                  youtube https://www.youtube.com/watch?v=ID | https://youtu.be/ID | https://www.youtube.com/embed/ID
- *                  (facade, auto-loaded when scrolled into view -> youtube-nocookie.com) or channel https://www.youtube.com/@handle (cannot be
- *                  iframed: renders an "Open channel" card); instagram https://www.instagram.com/(p|reel)/SHORTCODE/.
- *                  Nothing third-party loads until the embed scrolls into view. YouTube refuses playback from file:// (error 153): works when hosted.
+ *                embed (optional): {provider:"youtube"|"instagram"|"" (auto from url), url, thumb?, thumbAlt?} (thumb = img/<name>; YouTube default img/thumb-<id>.jpg from scripts/fetch-thumbs.mjs); url "" or absent = none. Strict allowlist:
+ *                  youtube (www./m./no-www, extra ?t=/&si= ok) watch?v=ID | youtu.be/ID | shorts|live|embed/ID
+ *                  (a "Play" text button inserts the player below the card text -> youtube-nocookie.com) or channel https://www.youtube.com/@handle (cannot be
+ *                  iframed: renders an "Open channel" link); instagram (p|reel|reels|tv)/SHORTCODE/ (optional user/ prefix, ?query ok);
+ *                  @handle/subpage, /channel/UC…, /c/, /user/ = channel. Other https links on those hosts = an "Open on …" link. Empty embed {} = none (dropped on save).
+ *                  Nothing third-party loads until the visitor clicks the button. YouTube refuses playback from file:// (error 153): works when hosted.
  *  contact       {heading, intro, links:[{label, href, style:"primary"|"default"}]}
  *  Sections experience/education/projects/skills/beyond/contact each take an optional boolean `hidden` (absent = visible; true = not rendered, nav link hidden; set from the editor).
  *  footer        {text}
@@ -86,7 +91,15 @@ window.SITE = {
   },
   "theme": {
     "preset": "blue",
-    "accent": ""
+    "accent": "",
+    "fontDisplay": "yeseva-one",
+    "fontText": "schibsted-grotesk",
+    "mat": {
+      "mode": "tinted",
+      "lines": 100,
+      "blur": 3,
+      "aura": "behind"
+    }
   },
   "experience": {
     "heading": "Experience",
@@ -99,6 +112,16 @@ window.SITE = {
         "bullets": [
           "Build, deploy and maintain machine-learning models in production on AWS.",
           "Work across recommendation, forecasting and LLM-agent projects, end to end."
+        ],
+        "skills": [
+          "Python",
+          "AWS SageMaker",
+          "MLOps",
+          "LLM agents",
+          "LangGraph",
+          "forecasting",
+          "recommendation",
+          "RecBole"
         ]
       },
       {
@@ -108,6 +131,14 @@ window.SITE = {
         "sub": "Ankara, Turkey",
         "bullets": [
           "Deep-learning segmentation and grading of cancerous tissue in histopathology slides; ran the AWS setup for datasets and distributed training."
+        ],
+        "skills": [
+          "AWS",
+          "PyTorch",
+          "OpenMMLab",
+          "CLIP",
+          "deep learning",
+          "image segmentation"
         ]
       },
       {
@@ -117,6 +148,13 @@ window.SITE = {
         "sub": "",
         "bullets": [
           "UR5 cobot motion-planning integration for the TÜBİTAK-funded Apprentice Project."
+        ],
+        "skills": [
+          "Robotics",
+          "UR5 cobot",
+          "motion planning",
+          "MoveIt",
+          "ROS"
         ]
       },
       {
@@ -126,6 +164,11 @@ window.SITE = {
         "sub": "",
         "bullets": [
           "Smart Delivery prototype for 5G logistics in the Vodafone Innovation Park, Düsseldorf."
+        ],
+        "skills": [
+          "5G",
+          "prototyping",
+          "logistics"
         ]
       },
       {
@@ -135,6 +178,12 @@ window.SITE = {
         "sub": "",
         "bullets": [
           "CI for a Ruby on Rails BI tool; automated AWS deployment tests."
+        ],
+        "skills": [
+          "Ruby on Rails",
+          "CI",
+          "AWS",
+          "test automation"
         ]
       }
     ]
@@ -145,14 +194,55 @@ window.SITE = {
       {
         "title": "MSc Computer Engineering",
         "sub": "METU · 2021–2024 · cGPA 3.80",
-        "text": "Thesis: detecting cancer tissue grade from histopathology images with deep learning."
+        "text": "Thesis: detecting cancer tissue grade from histopathology images with deep learning.",
+        "skills": [
+          "Python",
+          "PyTorch",
+          "deep learning",
+          "histopathology",
+          "computer vision"
+        ]
       },
       {
         "title": "BSc Computer Engineering",
         "sub": "METU · 2014–2020 · cGPA 3.29",
-        "text": "Graduation project: GLaTeX, a LaTeX editor inside Google Docs."
+        "text": "Graduation project: GLaTeX, a LaTeX editor inside Google Docs.",
+        "skills": [
+          "C++",
+          "Java",
+          "Python",
+          "LaTeX",
+          "Google Docs"
+        ]
       }
-    ]
+    ],
+    "thesis": {
+      "label": "MSc thesis",
+      "title": "Does language help a model read colorectal cancer slides?",
+      "text": "Pathologists grade colorectal cancer by eye on whole slide images, which is slow and varies from person to person. Models that outline the tumour grade pixel by pixel need annotated slides, and there are very few of those.\nI took MaskCLIP, a model that matches image regions to text prompts such as \"tumor grade 1\" or \"normal mucosa\", and made it trainable on our own annotated slides. The CLIP encoders stay frozen and only the decode head learns. Switching the text input on and off gave a fair test of what language adds.",
+      "points": [
+        "103 slides from 103 patients (Ankara Bilkent City Hospital), annotated pixel by pixel with pathologists into 5 classes: tumor grade 1, 2, 3, normal mucosa, other",
+        "8 models compared: ConvNeXt, Swin, SegFormer and MaskCLIP with ViT or ResNet backbones, image-only or image-text, plus a pathology-trained PLIP variant",
+        "Result: Swin was best (mean F-score 62.9). Image-only MaskCLIP scored 50 to 54; with text it fell to 52 (ResNet) and 37 (ViT). With prompts this generic, language did not help.",
+        "Pathology-trained PLIP weights beat the general CLIP ones. I also set up the AWS training pipeline."
+      ],
+      "link": {
+        "label": "",
+        "href": ""
+      },
+      "figures": [
+        {
+          "image": "img/thesis-histopathology.png",
+          "alt": "Four H&E stained colorectal slides, each next to its colour-coded annotation of tumor grades and normal mucosa",
+          "caption": "Slides and expert annotations: grade 1 green, grade 2 yellow, grade 3 red, normal mucosa blue."
+        },
+        {
+          "image": "img/thesis-architecture.png",
+          "alt": "Diagram: frozen CLIP text and image encoders feed a trainable segmentation decode head whose prediction is compared with the ground truth",
+          "caption": "Image-text MaskCLIP: frozen CLIP encoders, trainable decode head."
+        }
+      ]
+    }
   },
   "projects": {
     "heading": "Projects",
@@ -165,7 +255,7 @@ window.SITE = {
         "image": "img/project-claude-pm-board.png",
         "imageAlt": "The claude-pm-board project list: colourful project cards with short descriptors, next steps, open-task counts and Start buttons.",
         "live": {
-          "label": "Live",
+          "label": "Try the demo",
           "href": "https://sinasehlaver.github.io/demos/claude-pm-board/"
         }
       },
@@ -182,15 +272,15 @@ window.SITE = {
         }
       },
       {
-        "name": "pergel",
-        "url": "https://github.com/sinasehlaver/pergel",
-        "description": "Draft a logo with a compass: swing circles, ink the regions where they overlap, and export a clean true-arc SVG. Runs in the browser, nothing leaves your machine.",
+        "name": "How Computers Work",
+        "url": "",
+        "image": "img/project-how-computers-work.png",
+        "imageAlt": "A four-instruction program adding two numbers in registers, beside the chapter list from Lamp to Claude Code",
+        "description": "An interactive Turkish/English explainer of how a computer works, built up from a battery and a lamp to a processor and a game.",
         "source": "manual",
-        "image": "img/project-pergel.png",
-        "imageAlt": "Three overlapping circles on a square canvas with two of their regions inked in coral, beside the layer and canvas panels.",
         "live": {
-          "label": "Try it live",
-          "href": "https://pergel.onrender.com/"
+          "label": "To the site",
+          "href": "https://sinasehlaver.github.io/apps/how-computers-work/"
         }
       },
       {
@@ -206,15 +296,15 @@ window.SITE = {
         }
       },
       {
-        "name": "How Computers Work",
-        "url": "",
-        "image": "img/project-how-computers-work.png",
-        "imageAlt": "A four-instruction program adding two numbers in registers, beside the chapter list from Lamp to Claude Code",
-        "description": "An interactive Turkish/English explainer of how a computer works, built up from a battery and a lamp to a processor and a game.",
+        "name": "pergel",
+        "url": "https://github.com/sinasehlaver/pergel",
+        "description": "Draft a logo with a compass: swing circles, ink the regions where they overlap, and export a clean true-arc SVG. Runs in the browser, nothing leaves your machine.",
         "source": "manual",
+        "image": "img/project-pergel.png",
+        "imageAlt": "Three overlapping circles on a square canvas with two of their regions inked in coral, beside the layer and canvas panels.",
         "live": {
-          "label": "To the site",
-          "href": "https://sinasehlaver.github.io/apps/how-computers-work/"
+          "label": "Try it live",
+          "href": "https://pergel.onrender.com/"
         }
       }
     ]
@@ -273,98 +363,95 @@ window.SITE = {
         "kind": "text",
         "title": "Building with Claude Code",
         "text": "I use Claude Code to build whatever makes my life easier: an app that draws consistent, custom-styled charts and tables for my presentations, a notes and to-do app, a personal widget desktop, a Telegram assistant for my Mac, a ticketing site for university musicals. I run it like a small team: my own board hands backlog items to parallel agents, every project keeps its own rules and memory so nothing is explained twice, and nothing ships until its tests and browser checks pass.",
-        "image": "img/beyond-claude-code.png",
-        "imageAlt": "Illustration of a terminal window with a prompt and code lines, linked to a network of agent nodes",
         "link": {
           "label": "",
           "href": ""
-        }
-      },
-      {
-        "kind": "music",
-        "title": "Tonmeister & live sound",
-        "text": "Since 2014 I've mixed and recorded orchestras, musical shows and bands as a freelancer. Away from the console I tinker with Raspberry Pi, Arduino and 3D printers.",
-        "image": "img/beyond-live-sound.png",
-        "imageAlt": "Illustration of a mixing console with faders and a waveform",
-        "link": {
-          "label": "Follow on Instagram ↗",
-          "href": "https://www.instagram.com/sinasehlaver/"
         },
-        "embed": {
-          "provider": "instagram",
-          "url": ""
-        }
+        "embeds": []
       },
       {
         "kind": "video",
         "title": "Productions & events",
         "text": "I make music videos and run productions with crews of musicians, camera and sound people, and I organise events from the first call to the last cable. I'm the get-it-done person: if something's needed, I either do it or know who can. A wide network across music, theatre and tech makes that easy.",
-        "image": "img/beyond-productions.png",
-        "imageAlt": "Illustration of a clapperboard linked to a calendar and a network of people",
         "link": {
           "label": "",
           "href": ""
-        }
+        },
+        "wide": true,
+        "embeds": [
+          {
+            "provider": "youtube",
+            "url": "https://youtu.be/izEKsTqRTFw?si=Op-Alx8JiIFr3YAG&t=195",
+            "thumb": "",
+            "thumbAlt": "",
+            "link": {
+              "label": "My YouTube channel ↗",
+              "href": "https://www.youtube.com/@sinasehlaver8714"
+            }
+          },
+          {
+            "provider": "youtube",
+            "url": "https://youtu.be/OLYQllYu_RM?si=zBtub_1MTsqdMcrL&t=35",
+            "thumb": "",
+            "thumbAlt": "",
+            "link": {
+              "label": "Eksi on YouTube ↗",
+              "href": "https://www.youtube.com/@eksimusik"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "music",
+        "title": "Tonmeister & live sound",
+        "text": "Since 2014 I've mixed and recorded orchestras, musical shows and bands as a freelancer. Away from the console I tinker with Raspberry Pi, Arduino and 3D printers.",
+        "link": {
+          "label": "Follow on Instagram ↗",
+          "href": "https://www.instagram.com/sinasehlaver/"
+        },
+        "image": "img/img-9788-low.jpg",
+        "imageAlt": "",
+        "embeds": []
       },
       {
         "kind": "music",
         "title": "Musicals",
         "text": "Conducted a 16-piece orchestra for Big Fish (2022-23), music-directed Once (2019-20), Addams Family and Urinetown (2014-16), plus two self-written musicals.",
-        "image": "img/beyond-musicals.png",
-        "imageAlt": "Illustration of a stage with curtains, a spotlight and notes on a staff",
         "link": {
           "label": "",
           "href": ""
         },
-        "embed": {
-          "provider": "youtube",
-          "url": "https://www.youtube.com/watch?v=jB49wYjSNk0"
-        }
-      },
-      {
-        "kind": "video",
-        "title": "YouTube covers",
-        "text": "Covers and music videos live on my YouTube channel.",
-        "image": "img/beyond-covers.png",
-        "imageAlt": "Illustration of a video player with a play button and audio bars",
-        "link": {
-          "label": "My YouTube channel ↗",
-          "href": "https://www.youtube.com/@sinasehlaver8714"
-        },
-        "embed": {
-          "provider": "youtube",
-          "url": "https://www.youtube.com/watch?v=izEKsTqRTFw"
-        }
+        "image": "img/dscf1265.jpg",
+        "imageAlt": "",
+        "embeds": []
       },
       {
         "kind": "band",
-        "title": "Bazen Müzik",
-        "text": "2000s Turkish rock cover band.",
-        "image": "img/beyond-bands.png",
-        "imageAlt": "Illustration of two stage speakers and an amp level meter",
-        "link": {
-          "label": "BAZEN on Instagram ↗",
-          "href": "https://www.instagram.com/bazen.muzik/"
-        },
-        "embed": {
-          "provider": "instagram",
-          "url": "https://www.instagram.com/p/DGiIa8LovE5/"
-        }
-      },
-      {
-        "kind": "band",
-        "title": "Ekşi Değil Eksi",
+        "title": "Eksi",
         "text": "Turkish English, up-tempo disco funk cover band. Also produce cover videos.",
-        "image": "img/beyond-bands.png",
-        "imageAlt": "Illustration of two stage speakers and an amp level meter",
         "link": {
-          "label": "Ekşi Değil Eksi on Instagram ↗",
+          "label": "Eksi on Instagram ↗",
           "href": "https://www.instagram.com/eksidegileksi/"
         },
         "embed": {
           "provider": "instagram",
           "url": "https://www.instagram.com/p/DbG65S6M7_v/"
-        }
+        },
+        "embeds": []
+      },
+      {
+        "kind": "band",
+        "title": "Bazen",
+        "text": "2000s Turkish rock cover band.",
+        "link": {
+          "label": "Bazen on Instagram ↗",
+          "href": "https://www.instagram.com/bazen.muzik/"
+        },
+        "embed": {
+          "provider": "instagram",
+          "url": "https://www.instagram.com/p/DGiIa8LovE5/"
+        },
+        "embeds": []
       }
     ]
   },
@@ -548,49 +635,47 @@ window.SITE = {
       "items": [
         {
           "title": "Claude Code ile üretmek",
-          "text": "Hayatımı kolaylaştıran ne varsa Claude Code ile yapıyorum: sunumlarım için tutarlı, özel stilli grafik ve tablolar çizen bir uygulama, not ve yapılacaklar uygulaması, kişisel bir widget masaüstü, Mac'im için Telegram asistanı, üniversite müzikalleri için bir bilet satış sitesi. Küçük bir ekip gibi çalıştırıyorum: kendi panom backlog maddelerini paralel agent'lara dağıtıyor, her projenin kendi kuralları ve hafızası var, böylece hiçbir şey iki kez anlatılmıyor; testler ve tarayıcı kontrolleri geçmeden de hiçbir şey yayına çıkmıyor.",
-          "imageAlt": "Bir komut istemi ve kod satırları olan terminal penceresinin agent düğümlerinden oluşan bir ağa bağlandığı çizim"
+          "text": "Hayatımı kolaylaştıran ne varsa Claude Code ile yapıyorum: sunumlarım için tutarlı, özel stilli grafik ve tablolar çizen bir uygulama, not ve yapılacaklar uygulaması, kişisel bir widget masaüstü, Mac'im için Telegram asistanı, üniversite müzikalleri için bir bilet satış sitesi. Küçük bir ekip gibi çalıştırıyorum: kendi panom backlog maddelerini paralel agent'lara dağıtıyor, her projenin kendi kuralları ve hafızası var, böylece hiçbir şey iki kez anlatılmıyor; testler ve tarayıcı kontrolleri geçmeden de hiçbir şey yayına çıkmıyor."
+        },
+        {
+          "title": "Prodüksiyon ve etkinlikler",
+          "text": "Müzik videoları çekiyor, müzisyenlerden, kamera ve ses ekibinden oluşan ekiplerle prodüksiyon yürütüyorum; etkinlikleri de ilk telefondan son kabloya kadar organize ediyorum. İşi bitiren kişiyim: bir şey gerekiyorsa ya kendim yaparım ya da kimin yapacağını bilirim. Müzik, tiyatro ve teknoloji alanındaki geniş çevrem bunu kolaylaştırıyor.",
+          "embeds": [
+            {
+              "link": {
+                "label": "YouTube kanalım ↗"
+              }
+            },
+            {
+              "link": {
+                "label": "Eksi YouTube'da ↗"
+              }
+            }
+          ]
         },
         {
           "title": "Tonmeister ve canlı ses",
           "text": "2014'ten beri freelance olarak orkestraların, müzikallerin ve grupların canlı ses miksini yapıyor, kayıtlarını alıyorum. Mikserin başında olmadığım zamanlarda Raspberry Pi, Arduino ve 3D yazıcılarla uğraşıyorum.",
-          "imageAlt": "Faderlı bir mikser ve dalga biçimi çizimi",
           "link": {
             "label": "Instagram'da takip et ↗"
           }
         },
         {
-          "title": "Prodüksiyon ve etkinlikler",
-          "text": "Müzik videoları çekiyor, müzisyenlerden, kamera ve ses ekibinden oluşan ekiplerle prodüksiyon yürütüyorum; etkinlikleri de ilk telefondan son kabloya kadar organize ediyorum. İşi bitiren kişiyim: bir şey gerekiyorsa ya kendim yaparım ya da kimin yapacağını bilirim. Müzik, tiyatro ve teknoloji alanındaki geniş çevrem bunu kolaylaştırıyor.",
-          "imageAlt": "Bir klaketin takvime ve insanlardan oluşan bir ağa bağlandığı çizim"
-        },
-        {
           "title": "Müzikaller",
-          "text": "Big Fish (2022-23) için 16 kişilik orkestrayı şefledim; Once (2019-20), Addams Family ve Urinetown (2014-16) için müzik direktörlüğü yaptım. Kendi yazdığım iki müzikal de var.",
-          "imageAlt": "Perdeler, bir spot ışığı ve porte üzerinde notalar olan bir sahne çizimi"
+          "text": "Big Fish (2022-23) için 16 kişilik orkestrayı şefledim; Once (2019-20), Addams Family ve Urinetown (2014-16) için müzik direktörlüğü yaptım. Kendi yazdığım iki müzikal de var."
         },
         {
-          "title": "YouTube cover'ları",
-          "text": "Cover'larım ve müzik videolarım YouTube kanalımda.",
-          "imageAlt": "Oynat düğmeli bir video oynatıcı ve ses çubukları çizimi",
-          "link": {
-            "label": "YouTube kanalım ↗"
-          }
-        },
-        {
-          "title": "Bazen Müzik",
-          "text": "2000'ler Türk rock cover grubu.",
-          "imageAlt": "İki sahne hoparlörü ve bir amfi seviye göstergesi çizimi",
-          "link": {
-            "label": "BAZEN Instagram'da ↗"
-          }
-        },
-        {
-          "title": "Ekşi Değil Eksi",
+          "title": "Eksi",
           "text": "Türkçe ve İngilizce şarkılarla çalan, hareketli bir disko funk cover grubu. Cover videoları da çekiyoruz.",
-          "imageAlt": "İki sahne hoparlörü ve bir amfi seviye göstergesi çizimi",
           "link": {
-            "label": "Ekşi Değil Eksi Instagram'da ↗"
+            "label": "Eksi Instagram'da ↗"
+          }
+        },
+        {
+          "title": "Bazen",
+          "text": "2000'ler Türk rock cover grubu.",
+          "link": {
+            "label": "Bazen Instagram'da ↗"
           }
         }
       ]

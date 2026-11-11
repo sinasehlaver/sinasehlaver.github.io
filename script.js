@@ -76,36 +76,33 @@
     })();
   }
 
-  // embeds: the facade becomes an iframe when it nears the viewport (click is the fallback), only for the two allowed hosts
+  // embeds: the thumbnail's play button is swapped in place for the player (click only, nothing third-party loads before), only for the two allowed hosts
   var EMBED_OK = /^https:\/\/(www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}|www\.instagram\.com\/(p|reel)\/[A-Za-z0-9_-]{5,30}\/embed\/)$/;
   function load(b) {
     if (!b.isConnected) return;
     var src = b.getAttribute('data-embed-src') || '';
     if (!EMBED_OK.test(src)) return;
+    var frame = b.closest('.vframe');
+    if (!frame || frame.querySelector('iframe')) return;
+    var ig = b.getAttribute('data-embed-provider') === 'instagram';
     var f = document.createElement('iframe');
-    f.className = 'embed-frame embed-' + (b.getAttribute('data-embed-provider') === 'instagram' ? 'instagram' : 'youtube');
-    f.setAttribute('src', src);
-    f.setAttribute('title', 'Embedded content');
-    f.setAttribute('loading', 'lazy');
+    f.className = 'embed-frame';
+    // the click is the visitor's play: YouTube autoplays (Instagram's embed has no such switch)
+    f.setAttribute('src', ig ? src : src + '?autoplay=1&rel=0');
+    f.setAttribute('title', b.getAttribute('aria-label') || 'Embedded content');
     f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-    f.setAttribute('allow', f.className.indexOf('youtube') > 0 ? 'encrypted-media; picture-in-picture; fullscreen' : 'encrypted-media; fullscreen');
-    f.setAttribute('allowfullscreen', '');
-    b.replaceWith(f);
+    f.setAttribute('allow', ig ? 'encrypted-media; fullscreen' : 'autoplay; encrypted-media; picture-in-picture; fullscreen');
+    frame.classList.add('playing');
+    frame.replaceChildren(f);
   }
+  // a missing self-hosted thumbnail falls back to the gradient placeholder
+  function noThumb(im) { var fr = im.closest('.vframe'); if (fr) fr.classList.add('no-thumb'); im.parentNode.removeChild(im); }
+  document.addEventListener('error', function (e) { var t = e.target; if (t && t.classList && t.classList.contains('vthumb')) noThumb(t); }, true);
+  $$('img.vthumb').forEach(function (im) { if (im.complete && !im.naturalWidth) noThumb(im); });
   document.addEventListener('click', function (e) {
-    var b = e.target.closest && e.target.closest('button.embed-facade');
+    var b = e.target.closest && e.target.closest('button.embed-btn');
     if (b) load(b);
   });
-  if ('IntersectionObserver' in window) {
-    var eio = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (!en.isIntersecting) return;
-        eio.unobserve(en.target);
-        load(en.target);
-      });
-    }, { rootMargin: '200px' });
-    document.querySelectorAll('button.embed-facade[data-embed-src]').forEach(function (b) { eio.observe(b); });
-  }
 
   // cursor spotlight on cards
   $$('.card').forEach(function (card) {

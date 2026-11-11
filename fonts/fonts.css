@@ -1,0 +1,59 @@
+/* generated from fonts.json: one face rule per font, family name F-<slug>. Variable fonts get the full weight range. */
+@font-face{font-family:"F-gloock";src:url("gloock/Gloock-Regular.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-young-serif";src:url("young-serif/YoungSerif-Regular.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-caprasimo";src:url("caprasimo/Caprasimo-Regular.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-yeseva-one";src:url("yeseva-one/YesevaOne-Regular.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-familjen-grotesk";src:url("familjen-grotesk/FamiljenGrotesk[wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-schibsted-grotesk";src:url("schibsted-grotesk/SchibstedGrotesk[wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-big-shoulders-display";src:url("big-shoulders-display/BigShouldersDisplay[wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-unbounded";src:url("unbounded/Unbounded[wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-martian-mono";src:url("martian-mono/MartianMono[wdth,wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-sometype-mono";src:url("sometype-mono/SometypeMono[wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-xanh-mono";src:url("xanh-mono/XanhMono-Regular.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-fragment-mono";src:url("fragment-mono/FragmentMono-Regular.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-bevan";src:url("bevan/Bevan-Regular.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-rokkitt";src:url("rokkitt/Rokkitt[wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-besley";src:url("besley/Besley[wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-literata";src:url("literata/Literata[opsz,wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-gelasio";src:url("gelasio/Gelasio[wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-shantell-sans";src:url("shantell-sans/ShantellSans[BNCE,INFM,SPAC,wght].woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"F-syne-mono";src:url("syne-mono/SyneMono-Regular.woff2") format("woff2");font-weight:100 900;font-display:swap}
+/* pre-JS selection (baked index.html carries data-fd / data-ft; inline style attributes would be CSP-blocked) */
+html[data-fd="gloock"]{--font-display:"F-gloock","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="gloock"]{--font-text:"F-gloock",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="young-serif"]{--font-display:"F-young-serif","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="young-serif"]{--font-text:"F-young-serif",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="caprasimo"]{--font-display:"F-caprasimo","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="caprasimo"]{--font-text:"F-caprasimo",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="yeseva-one"]{--font-display:"F-yeseva-one","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="yeseva-one"]{--font-text:"F-yeseva-one",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="familjen-grotesk"]{--font-display:"F-familjen-grotesk","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="familjen-grotesk"]{--font-text:"F-familjen-grotesk",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="schibsted-grotesk"]{--font-display:"F-schibsted-grotesk","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="schibsted-grotesk"]{--font-text:"F-schibsted-grotesk",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="big-shoulders-display"]{--font-display:"F-big-shoulders-display","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="big-shoulders-display"]{--font-text:"F-big-shoulders-display",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="unbounded"]{--font-display:"F-unbounded","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="unbounded"]{--font-text:"F-unbounded",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="martian-mono"]{--font-display:"F-martian-mono","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="martian-mono"]{--font-text:"F-martian-mono",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="sometype-mono"]{--font-display:"F-sometype-mono","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="sometype-mono"]{--font-text:"F-sometype-mono",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="xanh-mono"]{--font-display:"F-xanh-mono","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="xanh-mono"]{--font-text:"F-xanh-mono",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="fragment-mono"]{--font-display:"F-fragment-mono","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="fragment-mono"]{--font-text:"F-fragment-mono",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="bevan"]{--font-display:"F-bevan","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="bevan"]{--font-text:"F-bevan",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="rokkitt"]{--font-display:"F-rokkitt","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="rokkitt"]{--font-text:"F-rokkitt",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="besley"]{--font-display:"F-besley","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="besley"]{--font-text:"F-besley",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="literata"]{--font-display:"F-literata","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="literata"]{--font-text:"F-literata",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="gelasio"]{--font-display:"F-gelasio","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="gelasio"]{--font-text:"F-gelasio",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="shantell-sans"]{--font-display:"F-shantell-sans","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="shantell-sans"]{--font-text:"F-shantell-sans",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+html[data-fd="syne-mono"]{--font-display:"F-syne-mono","Space Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif}
+html[data-ft="syne-mono"]{--font-text:"F-syne-mono",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}

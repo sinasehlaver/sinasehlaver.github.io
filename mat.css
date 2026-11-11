@@ -1,0 +1,40 @@
+/* Cutting-mat background. Gated by the root attribute render.js applyTheme sets: data-mat=tinted|green (absent = off). */
+
+html[data-mat]:not([data-mat-aura]) .aurora{display:none}
+html{--mat-blur:2px}
+html[data-mat-aura=behind] .aurora{z-index:-2}
+html[data-mat-aura=behind] .mat{background:color-mix(in srgb,var(--mat-bg) 72%,transparent)}
+html[data-mat-aura=over] .aurora{z-index:0;mix-blend-mode:screen;opacity:.7}
+html[data-mat-aura=over][data-theme=light] .aurora{mix-blend-mode:multiply;opacity:.5}
+html{--mat-op:.6}
+html[data-mat=tinted]{--mat-bg:color-mix(in srgb,var(--accent) 5%,var(--bg));--mat-l:var(--muted);--mat-a:var(--accent)}
+html[data-mat=green]{--mat-bg:#1c4033;--mat-l:#f1ecb8;--mat-a:#f1ecb8}
+html[data-theme=light][data-mat=green]{--mat-bg:#2f6a4c}
+.mat{position:fixed;inset:-24px;z-index:-1;filter:blur(var(--mat-blur));pointer-events:none;overflow:hidden;background:var(--mat-bg)}
+.mat svg{display:block;opacity:var(--mat-op)}
+.mat .mn,.mat .mj,.mat .hv,.mat .tk,.mat .an,.mat .ci,.mat .pt,.mat .rg{fill:none;stroke:var(--mat-l)}
+.mat .mn{stroke-opacity:.3;stroke-width:.5}
+.mat .mj{stroke-opacity:.5;stroke-width:.75}
+.mat .hv{stroke-opacity:.7;stroke-width:1.1}
+.mat .tk{stroke-opacity:.8;stroke-width:.75}
+.mat .tx{fill:var(--mat-l);fill-opacity:.9;font:8px ui-monospace,Menlo,monospace}
+.mat .rs{fill:var(--mat-bg);fill-opacity:.88}
+.mat .an{stroke:var(--mat-a);stroke-opacity:.6;stroke-width:.9}
+.mat .ci{stroke:var(--mat-a);stroke-opacity:.5;stroke-width:.8}
+.mat .pt{stroke:var(--mat-a);stroke-opacity:.7;stroke-width:.8}
+.mat .ptx{fill:var(--mat-a);fill-opacity:.9;font:8px ui-monospace,Menlo,monospace;text-anchor:middle;dominant-baseline:middle}
+.mat .ptx.sm{font-size:7px}
+.mat .rg{stroke:var(--mat-a);stroke-opacity:.8;stroke-width:1}
+
+/* Classic green: text sitting directly on the mat uses light ink in both themes; cards keep their own surfaces */
+html[data-mat=green]{--on:#f4f1e4;--on2:#dfe3d6;--gx:color-mix(in srgb,var(--accent2) 25%,#fff)}
+html[data-mat=green] :is(.logo,.hero h1,.hero h1 .grad,.role .pre,section>h2,.edu-h,.timeline h3,footer,.nav-links a:hover){color:var(--on)}
+html[data-mat=green] :is(.nav-links a,.lead,.sub,.timeline>li>.sub,.timeline time,.timeline ul,.chips b,footer){color:var(--on2)}
+html[data-mat=green] .nav-links a:hover{background:rgba(255,255,255,.14)}
+html[data-mat=green] .nav.scrolled{background:color-mix(in srgb,var(--mat-bg) 80%,transparent);border-bottom-color:rgba(255,255,255,.2)}
+html[data-mat=green] footer{border-top-color:rgba(255,255,255,.25)}
+html[data-mat=green] :is(.logo span,.typed){color:var(--gx)}
+html[data-mat=green] .caret{background:var(--gx)}
+html[data-mat=green] .timeline::before{background:linear-gradient(var(--gx),rgba(255,255,255,.25) 70%)}
+html[data-mat=green] .timeline>li::before{background:var(--mat-bg);border-color:var(--gx)}
+html[data-mat=green] .timeline li li::marker{color:var(--gx)}
