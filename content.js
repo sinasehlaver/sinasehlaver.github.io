@@ -37,6 +37,8 @@
  *                  Nothing third-party loads until the visitor clicks the button. YouTube refuses playback from file:// (error 153): works when hosted.
  *  contact       {heading, intro, links:[{label, href, style:"primary"|"default"}]}
  *  Sections experience/education/projects/skills/beyond/contact each take an optional boolean `hidden` (absent = visible; true = not rendered, nav link hidden; set from the editor).
+ *  Sections projects/beyond/education take an optional `layout`: projects "slider" (default, one horizontal row) | "grid" | "pane" (fixed right column >=1200px); beyond and education "grid" (default) | "slider".
+ *  order         (optional) section order on the page: a permutation of "projects","beyond","experience","education","skills","contact" (missing ids follow in the default order; set from the editor, Section order).
  *  footer        {text}
  *  tr            (optional) Turkish overlay: a PARTIAL copy of the content above, text fields only (meta, hero incl. prefix/words,
  *                headings, experience/education/projects/skills/beyond/contact text, footer). Arrays overlay by index; projects.items
@@ -91,14 +93,14 @@ window.SITE = {
   },
   "theme": {
     "preset": "blue",
-    "accent": "",
+    "accent": "#2fb2f4",
     "fontDisplay": "yeseva-one",
     "fontText": "schibsted-grotesk",
     "mat": {
       "mode": "tinted",
-      "lines": 100,
-      "blur": 3,
-      "aura": "behind"
+      "lines": 20,
+      "blur": 4,
+      "aura": "over"
     }
   },
   "experience": {
@@ -699,5 +701,13 @@ window.SITE = {
     "footer": {
       "text": "© 2026 Sina Şehlaver · Claude Code ile yapıldı"
     }
-  }
+  },
+  "order": [
+    "projects",
+    "experience",
+    "education",
+    "beyond",
+    "skills",
+    "contact"
+  ]
 };

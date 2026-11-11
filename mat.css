@@ -1,7 +1,10 @@
 /* Cutting-mat background. Gated by the root attribute render.js applyTheme sets: data-mat=tinted|green (absent = off). */
 
 html[data-mat]:not([data-mat-aura]) .aurora{display:none}
-html{--mat-blur:2px}
+html{--mat-blur:2px;--mat-b:2}
+/* Big CSS blurs make Chrome downscale the layer first, so hairline diagonals turn into stair-steps.
+   --k widens every stroke and divides its opacity by the same factor above 2px blur: same ink, no stairs. */
+.mat{--k:max(1, calc((var(--mat-b) - 1) * .8))}
 html[data-mat-aura=behind] .aurora{z-index:-2}
 html[data-mat-aura=behind] .mat{background:color-mix(in srgb,var(--mat-bg) 72%,transparent)}
 html[data-mat-aura=over] .aurora{z-index:0;mix-blend-mode:screen;opacity:.7}
@@ -13,18 +16,18 @@ html[data-theme=light][data-mat=green]{--mat-bg:#2f6a4c}
 .mat{position:fixed;inset:-24px;z-index:-1;filter:blur(var(--mat-blur));pointer-events:none;overflow:hidden;background:var(--mat-bg)}
 .mat svg{display:block;opacity:var(--mat-op)}
 .mat .mn,.mat .mj,.mat .hv,.mat .tk,.mat .an,.mat .ci,.mat .pt,.mat .rg{fill:none;stroke:var(--mat-l)}
-.mat .mn{stroke-opacity:.3;stroke-width:.5}
-.mat .mj{stroke-opacity:.5;stroke-width:.75}
-.mat .hv{stroke-opacity:.7;stroke-width:1.1}
-.mat .tk{stroke-opacity:.8;stroke-width:.75}
+.mat .mn{stroke-opacity:calc(.3 / var(--k));stroke-width:calc(.5px * var(--k))}
+.mat .mj{stroke-opacity:calc(.5 / var(--k));stroke-width:calc(.75px * var(--k))}
+.mat .hv{stroke-opacity:calc(.7 / var(--k));stroke-width:calc(1.1px * var(--k))}
+.mat .tk{stroke-opacity:calc(.8 / var(--k));stroke-width:calc(.75px * var(--k))}
 .mat .tx{fill:var(--mat-l);fill-opacity:.9;font:8px ui-monospace,Menlo,monospace}
 .mat .rs{fill:var(--mat-bg);fill-opacity:.88}
-.mat .an{stroke:var(--mat-a);stroke-opacity:.6;stroke-width:.9}
-.mat .ci{stroke:var(--mat-a);stroke-opacity:.5;stroke-width:.8}
-.mat .pt{stroke:var(--mat-a);stroke-opacity:.7;stroke-width:.8}
+.mat .an{stroke:var(--mat-a);stroke-opacity:calc(.6 / var(--k));stroke-width:calc(.9px * var(--k))}
+.mat .ci{stroke:var(--mat-a);stroke-opacity:calc(.5 / var(--k));stroke-width:calc(.8px * var(--k))}
+.mat .pt{stroke:var(--mat-a);stroke-opacity:calc(.7 / var(--k));stroke-width:calc(.8px * var(--k))}
 .mat .ptx{fill:var(--mat-a);fill-opacity:.9;font:8px ui-monospace,Menlo,monospace;text-anchor:middle;dominant-baseline:middle}
 .mat .ptx.sm{font-size:7px}
-.mat .rg{stroke:var(--mat-a);stroke-opacity:.8;stroke-width:1}
+.mat .rg{stroke:var(--mat-a);stroke-opacity:calc(.8 / var(--k));stroke-width:calc(1px * var(--k))}
 
 /* Classic green: text sitting directly on the mat uses light ink in both themes; cards keep their own surfaces */
 html[data-mat=green]{--on:#f4f1e4;--on2:#dfe3d6;--gx:color-mix(in srgb,var(--accent2) 25%,#fff)}

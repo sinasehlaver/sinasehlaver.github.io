@@ -41,10 +41,12 @@
     ' *                  (a thumbnail + play button; a click swaps it for the player -> youtube-nocookie.com) or channel https://www.youtube.com/@handle (cannot be',
     ' *                  iframed: renders an "Open channel" link); instagram https://www.instagram.com/(p|reel)/SHORTCODE/.',
     ' *                  embed.thumb (optional, img/<name>.png|jpg|webp, not svg) + embed.thumbAlt: self-hosted thumbnail. YouTube defaults to img/thumb-<id>.jpg',
-    ' *                  (scripts/fetch-thumbs.mjs downloads it); Instagram with no thumb shows a gradient placeholder.',
+    ' *                  (Instagram too; scripts/fetch-thumbs.mjs downloads both); a missing file shows a gradient placeholder.',
     ' *                  Nothing third-party loads until the visitor clicks the thumbnail. YouTube refuses playback from file:// (error 153): works when hosted.',
     ' *  contact       {heading, intro, links:[{label, href, style:"primary"|"default"}]}',
     ' *  Sections experience/education/projects/skills/beyond/contact each take an optional boolean `hidden` (absent = visible; true = not rendered, nav link hidden; set from the editor).',
+    ' *  Sections projects/beyond/education take an optional `layout`: projects "slider" (default, one horizontal row) | "grid" | "pane" (fixed right column >=1200px); beyond and education "grid" (default) | "slider".',
+    ' *  order         (optional) section order on the page: a permutation of "projects","beyond","experience","education","skills","contact" (missing ids follow in the default order; set from the editor, Section order).',
     ' *  footer        {text}',
     ' *  tr            (optional) Turkish overlay: a PARTIAL copy of the content above, text fields only (meta, hero incl. prefix/words,',
     ' *                headings, experience/education/projects/skills/beyond/contact text, footer). Arrays overlay by index; projects.items',
@@ -184,6 +186,17 @@
   ].map(function (f) { return { slug: f[0], family: f[1], role: f[2] }; });
   var FONT_SLUGS = FONTS.map(function (f) { return f.slug; });
   var MAT_MODES = ['off', 'tinted', 'green'];
+  // Page sections that can be reordered (top-level `order`). Default = the original page order.
+  var SECTION_IDS = ['projects', 'beyond', 'experience', 'education', 'skills', 'contact'];
+  function sectionOrder(d) {
+    var out = [], o = d && Array.isArray(d.order) ? d.order : [];
+    o.forEach(function (x) { if (SECTION_IDS.indexOf(x) >= 0 && out.indexOf(x) < 0) out.push(x); });
+    SECTION_IDS.forEach(function (x) { if (out.indexOf(x) < 0) out.push(x); });
+    return out;
+  }
+  // Per-section card layout (`<section>.layout`); the first value is the default.
+  var LAYOUTS = { projects: ['slider', 'grid', 'pane'], beyond: ['grid', 'slider'], education: ['grid', 'slider'] };
+  function layoutOf(d, id) { var l = LAYOUTS[id], v = d && d[id] && d[id].layout; return !l ? '' : (l.indexOf(v) >= 0 ? v : l[0]); }
   var MAT_AURA = ['off', 'behind', 'over'];
   var THEME_PRESETS = ['orange', 'teal', 'violet', 'green', 'rose', 'blue'];
   function isObj(x) { return x && typeof x === 'object' && !Array.isArray(x); }
@@ -222,6 +235,13 @@
       }
     }
     if (d.langSwitch != null && typeof d.langSwitch !== 'boolean') e.push('langSwitch must be a boolean');
+    if (d.order != null) {
+      if (!Array.isArray(d.order) || d.order.length > SECTION_IDS.length) e.push('order must be an array of at most ' + SECTION_IDS.length + ' section ids');
+      else d.order.forEach(function (x, i) {
+        if (SECTION_IDS.indexOf(x) < 0) e.push('order[' + i + '] must be one of ' + SECTION_IDS.join(', '));
+        else if (d.order.indexOf(x) !== i) e.push('order[' + i + '] repeats ' + x);
+      });
+    }
     var h = d.hero;
     if (!isObj(h)) e.push('hero missing');
     else {
@@ -258,6 +278,7 @@
       var s = d[name];
       if (!isObj(s)) return e.push(name + ' missing');
       if (s.hidden != null && typeof s.hidden !== 'boolean') e.push(name + '.hidden must be a boolean');
+      if (s.layout != null && (!LAYOUTS[name] || LAYOUTS[name].indexOf(s.layout) < 0)) e.push(name + '.layout must be one of ' + (LAYOUTS[name] || ['(none)']).join('|'));
       str(s.heading, name + '.heading');
       arr(s[listKey], name + '.' + listKey).forEach(function (it, i) {
         var p = name + '.' + listKey + '[' + i + ']';
@@ -348,7 +369,7 @@
   /* ---- Turkish (or any) text overlay: d.tr is a PARTIAL copy of the base content, text fields only. ----
      Non-text keys (urls, images, embeds, source, theme ...) are never taken from the overlay. Arrays overlay by index;
      projects items may carry `match` (base name or url) so a pinned sync that reorders items cannot misalign them. */
-  var NONTEXT = { hidden: 1, wide: 1, skills: 1, langSwitch: 1, href: 1, url: 1, image: 1, thumb: 1, embed: 1, source: 1, style: 1, kind: 1, value: 1, decimals: 1, suffix: 1, provider: 1, theme: 1, version: 1, tr: 1, match: 1 };
+  var NONTEXT = { hidden: 1, layout: 1, order: 1, wide: 1, skills: 1, langSwitch: 1, href: 1, url: 1, image: 1, thumb: 1, embed: 1, source: 1, style: 1, kind: 1, value: 1, decimals: 1, suffix: 1, provider: 1, theme: 1, version: 1, tr: 1, match: 1 };
   var TR_MAX = 2000;
   function trItemFor(baseItem, ovArr, i) {
     ovArr = Array.isArray(ovArr) ? ovArr : [];
@@ -430,7 +451,7 @@
     }
   }
 
-  return { HEADER: HEADER, FONTS: FONTS, MAT_MODES: MAT_MODES, EMBED_PROVIDERS: EMBED_PROVIDERS, parseEmbed: parseEmbed, embedLink: embedLink, embedProvider: embedProvider, KINDS: KINDS, SOURCES: SOURCES, STYLES: STYLES, MAX_IMAGE_BYTES: MAX_IMAGE_BYTES, IMAGE_TYPES: IMAGE_TYPES,
+  return { HEADER: HEADER, FONTS: FONTS, MAT_MODES: MAT_MODES, SECTION_IDS: SECTION_IDS, sectionOrder: sectionOrder, LAYOUTS: LAYOUTS, layoutOf: layoutOf, EMBED_PROVIDERS: EMBED_PROVIDERS, parseEmbed: parseEmbed, embedLink: embedLink, embedProvider: embedProvider, KINDS: KINDS, SOURCES: SOURCES, STYLES: STYLES, MAX_IMAGE_BYTES: MAX_IMAGE_BYTES, IMAGE_TYPES: IMAGE_TYPES,
     safeUrl: safeUrl, safeImage: safeImage, isSiteImagePath: isSiteImagePath, imageFileName: imageFileName,
     serialize: serialize, parse: parse, validate: validate, localize: localize, trItemFor: trItemFor, wordParts: wordParts, NONTEXT: NONTEXT };
 });

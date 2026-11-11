@@ -7,7 +7,7 @@
 })(typeof self !== 'undefined' ? self : this, function (Lib) {
   // Static UI strings (not in content.js). English is the key; `tr` is the Turkish table.
   var TR_UI = {
-    'I build': 'İşim gücüm:', 'Repo ↗': 'Kod ↗', 'Live': 'Canlı', 'Play': 'Oynat', 'Watch on Instagram': 'Instagram\'da izle',
+    'I build': 'İşim gücüm:', 'Repo ↗': 'Kod ↗', 'Collapse projects': 'Projeleri daralt', 'Expand projects': 'Projeleri aç', 'Projects': 'Projeler', 'Previous': 'Önceki', 'Next': 'Sonraki', 'Live': 'Canlı', 'Play': 'Oynat', 'Watch on Instagram': 'Instagram\'da izle',
     'Open channel': 'Kanalı aç', 'Open on {n}': '{n} üzerinde aç', 'Opens {n} in a new page': '{n} yeni sekmede açılır',
     'Play {n}': '{n} oynat', 'Play {n} {k}': '{n} {k} oynat', 'reel': 'reel', 'post': 'gönderi', 'video': 'video',
     'Projects': 'Projeler', 'Beyond': 'İş Dışında', 'Experience': 'Deneyim', 'Tools': 'Araçlar', 'Contact': 'İletişim',
@@ -53,6 +53,17 @@
   function setHidden(n, on) {
     if (on) n.setAttribute('hidden', '');
     else if (n.removeAttribute) n.removeAttribute('hidden');
+  }
+  function navHide(doc, href, off) {
+    Array.prototype.forEach.call(doc.querySelectorAll ? doc.querySelectorAll('.nav-links a[href="' + href + '"]') : [], function (l) { setHidden(l, off); });
+  }
+  // #education shell: created right after #experience when an older index.html lacks it; else falls back to #experience.
+  function sectionShell(doc, id, after) {
+    var n = q(doc, '#' + id);
+    if (n || !after || !after.parentNode || !after.parentNode.insertBefore) return n || after;
+    n = doc.createElement('section'); n.id = id;
+    after.parentNode.insertBefore(n, after.nextSibling);
+    return n;
   }
   function clear(n) { while (n && n.firstChild) n.removeChild(n.firstChild); }
   function q(doc, sel) { return doc.querySelector(sel); }
@@ -104,7 +115,7 @@
 
   function experience(doc, d, sec) {
     var x = o(d.experience);
-    if (x.hidden === true) { education(doc, d, sec); return; }
+    if (x.hidden === true) return;
     heading(doc, sec, 3, x);
     var ol = el(doc, 'ol', 'timeline compact');
     a(x.items).forEach(function (it) {
@@ -123,7 +134,6 @@
       ol.appendChild(li);
     });
     sec.appendChild(ol);
-    education(doc, d, sec);
   }
   function entrySkills(doc, li, list) {
     var items = a(list).map(s).filter(function (x) { return x.trim(); });
@@ -132,10 +142,10 @@
     items.forEach(function (x) { row.appendChild(el(doc, 'span', '', x)); });
     li.appendChild(row);
   }
-  function education(doc, d, sec) {
+  function education(doc, d, sec, opts, under) {   // under = legacy: rendered inside #experience
     var e = o(d.education);
     if (e.hidden === true) return;
-    sec.appendChild(el(doc, 'h2', 'edu-h reveal', s(e.heading)));
+    sec.appendChild(el(doc, 'h2', under ? 'edu-h reveal' : 'reveal', s(e.heading)));
     var eul = el(doc, 'ul', 'edu-list');
     a(e.items).forEach(function (it) {
       it = o(it);
@@ -146,7 +156,7 @@
       entrySkills(doc, li, it.skills);
       eul.appendChild(li);
     });
-    sec.appendChild(eul);
+    sec.appendChild(slider(doc, sec, eul, under ? '' : Lib.layoutOf(d, 'education'), s(e.heading) || 'Education'));
     thesis(doc, e.thesis, sec);
   }
 
@@ -190,8 +200,40 @@
   function projects(doc, d, sec) {
     var p = o(d.projects);
     heading(doc, sec, 1, p);
+    var lay = Lib.layoutOf(d, 'projects');
+    if (lay === 'pane') paneToggle(doc, sec, p);
     var grid = el(doc, 'div', 'grid projects-grid');
-    a(p.items).forEach(function (it) {
+    a(p.items).forEach(function (it) { grid.appendChild(projectCard(doc, it)); });
+    sec.appendChild(slider(doc, sec, grid, lay, s(p.heading) || ui(LANG, 'Projects')));
+  }
+  // layout "slider": the card grid becomes one horizontal, keyboard-scrollable row with ‹ › buttons (script.js scrolls it),
+  // wrapped in a .slide-stage that casts a soft shadow at a cut edge (CSS + script.js cut-start/cut-end). Returns the node to append.
+  function slider(doc, sec, track, lay, name) {
+    if (lay !== 'slider') return track;
+    track.className += ' slide-track';
+    track.setAttribute('tabindex', '0'); track.setAttribute('role', 'region'); track.setAttribute('aria-label', name);
+    var nav = el(doc, 'div', 'slide-nav');
+    [['prev', 'Previous', '‹'], ['next', 'Next', '›']].forEach(function (b) {
+      var bt = el(doc, 'button', 'slide-btn slide-' + b[0], b[2]);
+      bt.setAttribute('type', 'button'); bt.setAttribute('data-dir', b[0] === 'prev' ? '-1' : '1');
+      bt.setAttribute('aria-label', ui(LANG, b[1])); bt.setAttribute('title', ui(LANG, b[1]));
+      nav.appendChild(bt);
+    });
+    sec.appendChild(nav);
+    var stage = el(doc, 'div', 'slide-stage');
+    stage.appendChild(track);
+    return stage;
+  }
+  function paneToggle(doc, sec, p) {
+    // Right-side pane toggle (wide screens only; CSS hides it below 1200px). script.js owns the state.
+    var tg = el(doc, 'button', 'ppane-toggle');
+    tg.setAttribute('type', 'button'); tg.setAttribute('aria-controls', 'projects'); tg.setAttribute('aria-expanded', 'true');
+    tg.setAttribute('data-l-close', ui(LANG, 'Collapse projects')); tg.setAttribute('data-l-open', ui(LANG, 'Expand projects'));
+    tg.setAttribute('aria-label', ui(LANG, 'Collapse projects')); tg.setAttribute('title', ui(LANG, 'Collapse projects'));
+    tg.appendChild(el(doc, 'span', 'ppane-label', s(p.heading) || ui(LANG, 'Projects')));
+    sec.appendChild(tg);
+  }
+  function projectCard(doc, it) {
       it = o(it);
       var lv = o(it.live);
       var liveOk = /^https?:\/\//i.test(String(lv.href || '')) && Lib.safeUrl(lv.href);
@@ -214,9 +256,7 @@
         var lb = anchor(doc, 'btn small primary', lv.href); lb.textContent = (s(lv.label) || ui(LANG, 'Live')) + ' ↗'; row.appendChild(lb);
         c.appendChild(row);
       }
-      grid.appendChild(c);
-    });
-    sec.appendChild(grid);
+      return c;
   }
 
   function skills(doc, d, sec) {
@@ -232,7 +272,7 @@
   }
 
   // Thumbnail + play button (a real <button>): nothing third-party loads until the visitor clicks it; script.js then swaps in the iframe (DOM APIs, EMBED_OK allowlist).
-  // Thumbnails are self-hosted (CSP img-src 'self'): YouTube defaults to img/thumb-<id>.jpg; script.js hides a missing image and the gradient placeholder shows.
+  // Thumbnails are self-hosted (CSP img-src 'self'): YouTube and Instagram default to img/thumb-<id>.jpg (scripts/fetch-thumbs.mjs); script.js hides a missing image and the gradient placeholder shows.
   function embed(doc, card, act, e, title) {
     e = o(e);
     var p = Lib.parseEmbed(e.provider, e.url);
@@ -248,7 +288,7 @@
       act.appendChild(ch);
       return;
     }
-    var thumb = Lib.isSiteImagePath(e.thumb) ? e.thumb : (p.provider === 'youtube' && p.id ? 'img/thumb-' + p.id + '.jpg' : '');
+    var thumb = Lib.isSiteImagePath(e.thumb) ? e.thumb : (p.id && /^[\w-]+$/.test(p.id) ? 'img/thumb-' + p.id + '.jpg' : '');
     var fig = el(doc, 'div', 'vframe vframe-' + p.provider + (thumb ? '' : ' no-thumb'));
     var b = el(doc, 'button', 'vplay embed-btn embed-' + p.provider);
     b.setAttribute('type', 'button');
@@ -307,7 +347,7 @@
       if (act.firstChild) c.appendChild(act);
       grid.appendChild(c);
     });
-    sec.appendChild(grid);
+    sec.appendChild(slider(doc, sec, grid, Lib.layoutOf(d, 'beyond'), s(b.heading) || ui(LANG, 'Beyond')));
   }
 
   function contact(doc, d, sec) {
@@ -361,9 +401,9 @@
     var blur = typeof mt.blur === 'number' && mt.blur >= 0 && mt.blur <= 12 ? mt.blur : 2;
     var aura = mt.aura === 'behind' || mt.aura === 'over' ? mt.aura : '';
     if (mode) {
-      root.dataset.mat = mode; root.style.setProperty('--mat-op', String(lines / 100)); root.style.setProperty('--mat-blur', blur + 'px');
+      root.dataset.mat = mode; root.style.setProperty('--mat-op', String(lines / 100)); root.style.setProperty('--mat-blur', blur + 'px'); root.style.setProperty('--mat-b', String(blur));
       if (aura) root.dataset.matAura = aura; else delete root.dataset.matAura;
-    } else { delete root.dataset.mat; delete root.dataset.matAura; root.style.removeProperty('--mat-op'); root.style.removeProperty('--mat-blur'); }
+    } else { delete root.dataset.mat; delete root.dataset.matAura; root.style.removeProperty('--mat-op'); root.style.removeProperty('--mat-blur'); root.style.removeProperty('--mat-b'); }
     if (doc.body && doc.querySelector) {
       var mel = doc.querySelector('.mat');
       if (mode && !mel) { mel = doc.createElement('div'); mel.className = 'mat'; mel.setAttribute('aria-hidden', 'true'); doc.body.insertBefore(mel, doc.body.firstChild); }
@@ -393,16 +433,26 @@
     if (m.title) doc.title = s(m.title);
     var md = q(doc, 'meta[name=description]');
     if (md) md.setAttribute('content', s(m.description));
-    var map = [['#top', hero], ['#projects', projects], ['#beyond', beyond], ['#experience', experience], ['#skills', skills], ['#contact', contact]];
-    map.forEach(function (r) {
-      var n = q(doc, r[0]); if (!n) return;
-      if (r[1] === hero) return hero(doc, d, n);
+    var hn = q(doc, '#top'); if (hn) hero(doc, d, hn);
+    var fns = { projects: projects, beyond: beyond, experience: experience, education: education, skills: skills, contact: contact };
+    var order = Lib.sectionOrder(d), xp = q(doc, '#experience'), ed = sectionShell(doc, 'education', xp);
+    var legacy = ed === xp;   // older shell without #education (and no parent to add one): degrees go under the timeline
+    order.forEach(function (id) {
+      if (legacy && id === 'education') return;
+      var n = q(doc, '#' + id); if (!n) return;
+      var off = o(d[id]).hidden === true && !(legacy && id === 'experience' && o(d.education).hidden !== true);
       clear(n);
-      var off = r[1] !== hero && (r[0] === '#experience' ? o(d.experience).hidden === true && o(d.education).hidden === true : o(d[r[0].slice(1)]).hidden === true);
       setHidden(n, off);
-      Array.prototype.forEach.call(doc.querySelectorAll ? doc.querySelectorAll('.nav-links a[href="' + r[0] + '"]') : [], function (l) { setHidden(l, off); });
-      if (!off) r[1](doc, d, n, opts);
+      if (Lib.LAYOUTS[id] && n.setAttribute) n.setAttribute('data-layout', Lib.layoutOf(d, id));
+      navHide(doc, '#' + id, off);
+      if (!off) fns[id](doc, d, n, opts);
+      if (!off && legacy && id === 'experience') education(doc, d, n, opts, true);
     });
+    // Page + nav follow `order`: re-append each section (and its nav link) in turn.
+    var main = xp && xp.parentNode;
+    if (main && main.appendChild) order.forEach(function (id) { var n = q(doc, '#' + id); if (n && n.parentNode === main) main.appendChild(n); });
+    var nav = q(doc, '.nav-links');
+    if (nav && nav.querySelector) order.forEach(function (id) { var l = nav.querySelector('a[href="#' + id + '"]'); if (l) nav.appendChild(l); });
     var f = q(doc, 'footer');
     if (f) { clear(f); f.appendChild(el(doc, 'p', '', s(o(d.footer).text))); }
   }

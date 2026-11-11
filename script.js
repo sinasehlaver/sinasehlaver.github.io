@@ -104,6 +104,59 @@
     if (b) load(b);
   });
 
+  // projects side pane (>=1200px): collapse/expand, remembered; default expanded
+  var root = document.documentElement;
+  function syncPane() {
+    var c = root.dataset.ppane === 'collapsed';
+    $$('.ppane-toggle').forEach(function (b) {
+      b.setAttribute('aria-expanded', c ? 'false' : 'true');
+      var t = b.getAttribute(c ? 'data-l-open' : 'data-l-close');
+      if (t) { b.setAttribute('aria-label', t); b.setAttribute('title', t); }
+    });
+  }
+  function setPane(collapsed) {
+    if (collapsed) root.dataset.ppane = 'collapsed'; else delete root.dataset.ppane;
+    try { localStorage.setItem('ppane', collapsed ? 'collapsed' : 'expanded'); } catch (e) {}
+    syncPane();
+  }
+  function setNavH() { root.style.setProperty('--nav-h', nav.offsetHeight + 'px'); }
+  setNavH(); addEventListener('resize', setNavH, { passive: true });
+  syncPane();
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('.ppane-toggle');
+    if (t) { setPane(root.dataset.ppane !== 'collapsed'); return; }
+    var l = e.target.closest && e.target.closest('a[href="#projects"]');
+    if (l && root.dataset.ppane === 'collapsed' && matchMedia('(min-width: 1200px)').matches) setPane(false);
+  });
+  // the editor preview re-renders #projects: keep the new button's label in step
+  new MutationObserver(syncPane).observe($('#projects') || document.body, { childList: true });
+
+  // layout "slider": ‹ › scroll the section's track by ~one view; buttons disable at the ends
+  function trackOf(n) { var sec = n.closest && n.closest('section'); return sec && sec.querySelector('.slide-track'); }
+  function syncSlides() {
+    $$('.slide-nav').forEach(function (nv) {
+      var t = trackOf(nv); if (!t) return;
+      var max = t.scrollWidth - t.clientWidth - 2;
+      nv.hidden = max <= 0;
+      var p = $('.slide-prev', nv), n = $('.slide-next', nv);
+      if (p) p.disabled = t.scrollLeft <= 2;
+      if (n) n.disabled = t.scrollLeft >= max;
+      var st = t.parentNode;   // .slide-stage: edge shadow only on a side with hidden cards
+      if (st && st.classList) { st.classList.toggle('cut-start', t.scrollLeft > 2); st.classList.toggle('cut-end', max > 0 && t.scrollLeft < max); }
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.slide-btn');
+    var t = b && trackOf(b); if (!t) return;
+    t.scrollBy({ left: (+b.getAttribute('data-dir') || 1) * Math.max(200, t.clientWidth * 0.85), behavior: reduce ? 'auto' : 'smooth' });
+  });
+  document.addEventListener('scroll', function (e) { if (e.target.classList && e.target.classList.contains('slide-track')) syncSlides(); }, { capture: true, passive: true });
+  addEventListener('resize', syncSlides, { passive: true });
+  syncSlides();
+  // editor preview re-renders sections: re-check the new tracks
+  var slideMo = new MutationObserver(function () { requestAnimationFrame(syncSlides); });
+  $$('#projects, #beyond, #education').forEach(function (s) { slideMo.observe(s, { childList: true }); });
+
   // cursor spotlight on cards
   $$('.card').forEach(function (card) {
     card.addEventListener('pointermove', function (e) {
